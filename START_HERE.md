@@ -30,7 +30,7 @@ npm install
 
 # 2. 配置API密钥（可选）
 # 编辑.env文件，添加：
-# VITE_JUHE_API_KEY=your_api_key_here
+# VITE_JISU_API_KEY=your_api_key_here
 
 # 3. 启动开发服务器
 npm run dev
@@ -237,7 +237,7 @@ vercel login
 vercel
 
 # 4. 配置环境变量（在Vercel Dashboard）
-# VITE_JUHE_API_KEY=your_api_key_here
+# VITE_JISU_API_KEY=your_api_key_here
 ```
 
 ### 获取HTTPS
@@ -286,7 +286,7 @@ Vercel会自动提供：
 
 **A**:
 1. 检查.env文件是否配置了API_KEY
-2. 访问聚合数据控制台查看额度
+2. 访问极速数据控制台查看额度
 3. 暂时可以不配置API，应用仍可使用基础功能
 
 ### Q: 样式显示不正确怎么办？

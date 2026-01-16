@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserSettings } from '../../types/settings';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useToast } from '../../hooks/useToast';
-import { getZodiacSign } from '../../constants/zodiacColors';
-import { calculateLuckyColor } from '../../utils/luckyColor';
-import { Header } from '../layout/Header';
-import { Button } from '../common/Button';
-import { TabBar } from '../layout/TabBar';
-import { APP_CONFIG } from '../../config/app';
-import { getStorageSize } from '../../utils/storage';
+import { UserSettings } from '../types/settings';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useToast } from '../hooks/useToast';
+import { getZodiacSign } from '../constants/zodiacColors';
+import { calculateLuckyColor } from '../utils/luckyColor';
+import { Header } from '../components/layout/Header';
+import { Button } from '../components/common/Button';
+import { TabBar } from '../components/layout/TabBar';
+import { APP_CONFIG } from '../config/app';
+import { getStorageSize } from '../utils/storage';
 
 export function SettingsPage() {
   const navigate = useNavigate();

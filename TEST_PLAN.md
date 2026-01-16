@@ -140,7 +140,7 @@
 #### API配置测试
 ```
 □ 检查.env文件是否配置API_KEY
-□ 访问 https://www.juhe.cn/ 检查API状态
+□ 访问 https://www.jisuapi.com/ 检查API状态
 □ 确保API额度充足（免费100次/天）
 ```
 

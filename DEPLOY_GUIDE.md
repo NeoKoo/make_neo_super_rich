@@ -134,7 +134,7 @@ Install Command: npm install
 在"Environment Variables"部分添加：
 
 ```
-VITE_JUHE_API_KEY = your_api_key_here
+VITE_JISU_API_KEY = your_api_key_here
 ```
 
 **重要**：如果在生产环境使用API，必须配置此变量。
@@ -178,12 +178,12 @@ Build Output: Static
 #### Environment Variables
 
 ```bash
-VITE_JUHE_API_KEY = your_api_key_here
+VITE_JISU_API_KEY = your_api_key_here
 ```
 
 **添加步骤**：
 1. 点击"Environment Variables"
-2. 输入`VITE_JUHE_API_KEY`
+2. 输入`VITE_JISU_API_KEY`
 3. 输入API Key值
 4. 点击"Add"
 5. 重新部署以应用环境变量
@@ -320,11 +320,11 @@ Output Directory: dist
 
 1. **环境变量配置**
    - Dashboard → Environment Variables
-   - 确保`VITE_JUHE_API_KEY`已添加
+   - 确保`VITE_JISU_API_KEY`已添加
    - 重新部署以应用
 
 2. **API额度**
-   - 访问聚合数据控制台
+   - 访问极速数据控制台
    - 检查剩余额度
 
 3. **CORS问题**
@@ -497,7 +497,7 @@ vercel
 ### 环境变量
 
 ```bash
-VITE_JUHE_API_KEY = your_api_key_here
+VITE_JISU_API_KEY = your_api_key_here
 ```
 
 ---

@@ -32,17 +32,17 @@ npm install
 
 ### 3. 配置API密钥
 
-#### 方法A：使用聚合数据API（推荐）
+#### 方法A：使用极速数据API（推荐）
 
-1. 访问 https://www.juhe.cn/ 注册账号
+1. 访问 https://www.jisuapi.com/ 注册账号
 2. 进入"控制台" → "数据中心" → "我的API"
-3. 搜索"彩票开奖结果查询"并申请
+3. 搜索"彩票开奖"并申请
 4. 获取API Key
 
 在项目根目录创建/编辑`.env`文件：
 
 \`\`\`env
-VITE_JUHE_API_KEY=你的API_KEY
+VITE_JISU_API_KEY=你的API_KEY
 \`\`\`
 
 #### 方法B：临时跳过API（仅测试）

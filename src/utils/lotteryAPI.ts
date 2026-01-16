@@ -1,16 +1,40 @@
 import { LotteryType } from '../types/lottery';
-import { DrawResult, LotteryApiResponse } from '../types/storage';
+import { DrawResult, LotteryApiResponse, JisuApiResponse } from '../types/storage';
 import { API_CONFIG } from '../config/api';
 
-const LOTTERY_ID_MAP: Record<LotteryType, string> = {
-  [LotteryType.SHUANGSEQIU]: 'ssq',
-  [LotteryType.DALETOU]: 'dlt'
+// 极速数据彩票ID映射
+const LOTTERY_ID_MAP: Record<LotteryType, number> = {
+  [LotteryType.SHUANGSEQIU]: 11, // 双色球
+  [LotteryType.DALETOU]: 14      // 大乐透
 };
+
+// 极速数据API响应接口
+interface JisuDrawResult {
+  caipiaoid: string;
+  issueno: string;
+  number: string;       // 红球，格式: "05 07 10 18 19 21 27"
+  refernumber: string; // 蓝球，格式: "28"
+  opendate: string;    // 开奖日期，格式: "2014-10-29"
+  deadline: string;     // 兑奖截止日期
+  saleamount: string;   // 销售额
+  prize?: Array<{
+    prizename: string;
+    require: string;
+    num: string;
+    singlebonus: string;
+  }>;
+}
+
+interface JisuApiData {
+  status: number;
+  msg: string;
+  result: JisuDrawResult;
+}
 
 export async function fetchLatestDraw(lotteryType: LotteryType): Promise<DrawResult | null> {
   try {
-    const lotteryId = LOTTERY_ID_MAP[lotteryType];
-    const url = `${API_CONFIG.baseUrl}/query?key=${API_CONFIG.juheKey}&lottery_id=${lotteryId}`;
+    const caipiaoid = LOTTERY_ID_MAP[lotteryType];
+    const url = `${API_CONFIG.baseUrl}/caipiao/query?appkey=${API_CONFIG.jisuKey}&caipiaoid=${caipiaoid}`;
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.requestTimeout);
@@ -29,10 +53,10 @@ export async function fetchLatestDraw(lotteryType: LotteryType): Promise<DrawRes
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data: LotteryApiResponse = await response.json();
+    const data: JisuApiData = await response.json();
     
-    if (data.error_code !== 0) {
-      console.error('查询开奖结果失败:', data.reason);
+    if (data.status !== 0) {
+      console.error('查询开奖结果失败:', data.msg);
       return null;
     }
     
@@ -41,20 +65,21 @@ export async function fetchLatestDraw(lotteryType: LotteryType): Promise<DrawRes
     }
     
     const result = data.result;
-    const numberStr = result.lottery_res;
-    const numbers = numberStr.split(',').map(n => parseInt(n.trim()));
+    const numberStr = result.number;
+    const numbers = numberStr.split(' ').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    const referNumbers = result.refernumber.split(' ').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
     
     const redBallsCount = lotteryType === LotteryType.SHUANGSEQIU ? 6 : 5;
     
     return {
-      lotteryId: result.lottery_id,
+      lotteryId: result.issueno,
       lotteryType,
-      drawDate: result.lottery_date,
+      drawDate: result.opendate,
       numbers: {
         redBalls: numbers.slice(0, redBallsCount),
-        blueBalls: numbers.slice(redBallsCount)
+        blueBalls: referNumbers
       },
-      issue: result.lottery_no
+      issue: result.issueno
     };
   } catch (error) {
     console.error('请求开奖结果失败:', error);
@@ -67,8 +92,8 @@ export async function fetchDrawByIssue(
   issue: string
 ): Promise<DrawResult | null> {
   try {
-    const lotteryId = LOTTERY_ID_MAP[lotteryType];
-    const url = `${API_CONFIG.baseUrl}/query?key=${API_CONFIG.juheKey}&lottery_id=${lotteryId}&lottery_no=${issue}`;
+    const caipiaoid = LOTTERY_ID_MAP[lotteryType];
+    const url = `${API_CONFIG.baseUrl}/caipiao/query?appkey=${API_CONFIG.jisuKey}&caipiaoid=${caipiaoid}&issueno=${issue}`;
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.requestTimeout);
@@ -87,9 +112,9 @@ export async function fetchDrawByIssue(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data: LotteryApiResponse = await response.json();
+    const data: JisuApiData = await response.json();
     
-    if (data.error_code !== 0) {
+    if (data.status !== 0) {
       return null;
     }
     
@@ -98,20 +123,21 @@ export async function fetchDrawByIssue(
     }
     
     const result = data.result;
-    const numberStr = result.lottery_res;
-    const numbers = numberStr.split(',').map(n => parseInt(n.trim()));
+    const numberStr = result.number;
+    const numbers = numberStr.split(' ').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    const referNumbers = result.refernumber.split(' ').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
     
     const redBallsCount = lotteryType === LotteryType.SHUANGSEQIU ? 6 : 5;
     
     return {
-      lotteryId: result.lottery_id,
+      lotteryId: result.issueno,
       lotteryType,
-      drawDate: result.lottery_date,
+      drawDate: result.opendate,
       numbers: {
         redBalls: numbers.slice(0, redBallsCount),
-        blueBalls: numbers.slice(redBallsCount)
+        blueBalls: referNumbers
       },
-      issue: result.lottery_no
+      issue: result.issueno
     };
   } catch (error) {
     console.error('查询开奖结果失败:', error);

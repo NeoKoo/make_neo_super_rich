@@ -296,7 +296,7 @@ npm install
 
 # 2. 配置API密钥（可选）
 # 编辑 .env 文件，添加：
-# VITE_JUHE_API_KEY=your_api_key_here
+# VITE_JISU_API_KEY=your_api_key_here
 
 # 3. 启动开发服务器
 npm run dev
@@ -402,7 +402,7 @@ vercel
 
 ### 后端/存储
 - **localStorage** - 本地数据存储
-- **聚合数据API** - 开奖数据接口
+- **极速数据API** - 开奖数据接口
 - **7天缓存策略** - 减少API调用
 
 ### 部署平台

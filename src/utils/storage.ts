@@ -1,8 +1,16 @@
-import { STORAGE_KEYS } from '../constants/storageKeys';
+/**
+ * Storage utility functions for localStorage operations
+ */
 
+/**
+ * Get item from localStorage
+ * @param key - Storage key
+ * @param defaultValue - Default value if key doesn't exist
+ * @returns Parsed value from localStorage or default value
+ */
 export function getFromStorage<T>(key: string, defaultValue: T): T {
   try {
-    const item = localStorage.getItem(key);
+    const item = window.localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
     console.error(`Error reading from localStorage (${key}):`, error);
@@ -10,44 +18,57 @@ export function getFromStorage<T>(key: string, defaultValue: T): T {
   }
 }
 
-export function saveToStorage<T>(key: string, value: T): boolean {
+/**
+ * Save item to localStorage
+ * @param key - Storage key
+ * @param value - Value to save
+ */
+export function saveToStorage<T>(key: string, value: T): void {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
-    return true;
+    window.localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.error(`Error saving to localStorage (${key}):`, error);
-    return false;
+    console.error(`Error setting localStorage (${key}):`, error);
   }
 }
 
-export function removeFromStorage(key: string): boolean {
+/**
+ * Remove item from localStorage
+ * @param key - Storage key
+ */
+export function removeFromStorage(key: string): void {
   try {
-    localStorage.removeItem(key);
-    return true;
+    window.localStorage.removeItem(key);
   } catch (error) {
     console.error(`Error removing from localStorage (${key}):`, error);
-    return false;
   }
 }
 
-export function clearAllLotteryStorage(): void {
-  Object.values(STORAGE_KEYS).forEach(key => {
-    localStorage.removeItem(key);
-  });
-}
-
-export function getStorageSize(): string {
-  let total = 0;
-  for (let key in localStorage) {
-    if (localStorage.hasOwnProperty(key)) {
-      total += (localStorage[key].length + key.length) * 2;
+/**
+ * Get total size of localStorage in bytes
+ * @returns Size in bytes
+ */
+export function getStorageSize(): number {
+  try {
+    let total = 0;
+    for (let key in window.localStorage) {
+      if (window.localStorage.hasOwnProperty(key)) {
+        total += window.localStorage[key].length + key.length;
+      }
     }
+    return total;
+  } catch (error) {
+    console.error('Error calculating storage size:', error);
+    return 0;
   }
-  const bytes = total;
-  const kb = bytes / 1024;
-  const mb = kb / 1024;
-  
-  if (mb > 1) return `${mb.toFixed(2)} MB`;
-  if (kb > 1) return `${kb.toFixed(2)} KB`;
-  return `${bytes} bytes`;
+}
+
+/**
+ * Clear all localStorage items (use with caution)
+ */
+export function clearStorage(): void {
+  try {
+    window.localStorage.clear();
+  } catch (error) {
+    console.error('Error clearing storage:', error);
+  }
 }

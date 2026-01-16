@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { HistoryRecord } from '../../types/history';
-import { useHistory } from '../../hooks/useHistory';
-import { useLotteryAPI } from '../../hooks/useLotteryAPI';
-import { useToast } from '../../hooks/useToast';
-import { Header } from '../layout/Header';
-import { HistoryItem } from '../history/HistoryItem';
-import { Loading } from '../common/Loading';
-import { TabBar } from '../layout/TabBar';
+import { HistoryRecord } from '../types/history';
+import { useHistory } from '../hooks/useHistory';
+import { useLotteryAPI } from '../hooks/useLotteryAPI';
+import { useToast } from '../hooks/useToast';
+import { Header } from '../components/layout/Header';
+import { HistoryItem } from '../components/history/HistoryItem';
+import { Loading } from '../components/common/Loading';
+import { TabBar } from '../components/layout/TabBar';
 
 export function HistoryPage() {
   const { history, clearHistory, updateHistory, deleteHistory } = useHistory();

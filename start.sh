@@ -39,7 +39,7 @@ if [ ! -f .env ]; then
     echo "📝 请编辑.env文件，添加您的API密钥："
     echo "   VITE_JUHE_API_KEY=your_api_key_here"
     echo ""
-    echo "💡 提示：API密钥申请地址：https://www.juhe.cn/"
+    echo "💡 提示：API密钥申请地址：https://www.jisuapi.com/api/caipiao/"
     echo ""
     read -p "是否现在编辑.env文件？(y/n) " -n 1 -r
     echo

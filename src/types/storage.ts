@@ -10,6 +10,7 @@ export interface StorageDrawCache {
   expiresAt: number;
 }
 
+// 极速数据API响应接口（用于历史类型保留）
 export interface LotteryApiResponse {
   error_code: number;
   reason: string;
@@ -22,5 +23,26 @@ export interface LotteryApiResponse {
     lottery_exdate?: string;
     lottery_sale_amount?: string;
     lottery_pool_amount?: string;
+  };
+}
+
+// 极速数据API响应接口
+export interface JisuApiResponse {
+  status: number;
+  msg: string;
+  result: {
+    caipiaoid: string;
+    issueno: string;
+    number: string;
+    refernumber: string;
+    opendate: string;
+    deadline: string;
+    saleamount: string;
+    prize?: Array<{
+      prizename: string;
+      require: string;
+      num: string;
+      singlebonus: string;
+    }>;
   };
 }
