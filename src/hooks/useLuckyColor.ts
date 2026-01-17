@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { LuckyColorResult } from '../types/color';
 import { UserSettings } from '../types/settings';
 import { calculateLuckyColor } from '../utils/luckyColor';

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LotteryType } from '../types/lottery';
 import { useLotteryConfig } from '../hooks/useLotteryConfig';
 import { useNumberSelection } from '../hooks/useNumberSelection';
 import { useLuckyColor } from '../hooks/useLuckyColor';
@@ -26,7 +25,7 @@ export function HomePage() {
   const { addHistory } = useHistory();
   const { generateNumbers } = useRandomNumbers();
   const { success, error } = useToast();
-  const [settings, setSettings] = useLocalStorage(
+  const [settings] = useLocalStorage(
     'lottery_user_settings',
     APP_CONFIG.defaultSettings
   );
@@ -85,7 +84,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen pb-32 bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor }}>
+    <div className="min-h-screen pb-32 bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
       <div className="px-4 pt-4 pb-32">
         <LotteryTypeBadge type={lotteryType} />
         

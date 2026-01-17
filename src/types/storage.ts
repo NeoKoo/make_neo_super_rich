@@ -1,6 +1,8 @@
+import { LotteryType } from './lottery';
+
 export interface StorageDrawCache {
   lotteryId: string;
-  lotteryType: '双色球' | '大乐透';
+  lotteryType: LotteryType;
   drawDate: string;
   numbers: {
     redBalls: number[];

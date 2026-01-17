@@ -1,5 +1,5 @@
 import { LotteryType } from '../types/lottery';
-import { DrawResult, LotteryApiResponse, JisuApiResponse } from '../types/storage';
+import { DrawResult } from '../types/history';
 import { API_CONFIG } from '../config/api';
 
 // 极速数据彩票ID映射

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { HistoryRecord } from '../types/history';
 import { useHistory } from '../hooks/useHistory';
 import { useLotteryAPI } from '../hooks/useLotteryAPI';
 import { useToast } from '../hooks/useToast';
@@ -9,9 +8,9 @@ import { Loading } from '../components/common/Loading';
 import { TabBar } from '../components/layout/TabBar';
 
 export function HistoryPage() {
-  const { history, clearHistory, updateHistory, deleteHistory } = useHistory();
+  const { history, clearHistory, deleteHistory } = useHistory();
   const { loading, fetchAndCheckDraws } = useLotteryAPI();
-  const { success, error, info } = useToast();
+  const { success, info } = useToast();
   
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -79,7 +78,7 @@ export function HistoryPage() {
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-text-secondary">共 {history.length} 条记录</span>
               <button
-                onClick={() => setConfirmClear(true)}
+                onClick={confirmClear ? handleClearAll : () => setConfirmClear(true)}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
                   confirmClear
                     ? 'bg-status-error hover:bg-red-700 text-white'

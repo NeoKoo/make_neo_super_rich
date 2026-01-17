@@ -1,4 +1,5 @@
-import { StorageDrawCache, DrawResult } from '../types/storage';
+import { StorageDrawCache } from '../types/storage';
+import { DrawResult } from '../types/history';
 import { getFromStorage, saveToStorage } from './storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { API_CONFIG } from '../config/api';

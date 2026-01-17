@@ -84,7 +84,7 @@ export async function getAIRecommendation(
     const aiContent = data.choices[0].message.content.trim();
     
     // 解析AI返回的内容
-    return parseAIResponse(aiContent, lotteryType);
+    return parseAIResponse(aiContent);
   } catch (error) {
     console.error('AI recommendation error:', error);
     return null;
@@ -94,7 +94,7 @@ export async function getAIRecommendation(
 /**
  * 解析AI返回的号码推荐
  */
-function parseAIResponse(text: string, lotteryType: LotteryType): LotteryRecommendation | null {
+function parseAIResponse(text: string): LotteryRecommendation | null {
   try {
     // 提取号码部分
     const match = text.match(/今晚的开奖号码为：(.+)/);

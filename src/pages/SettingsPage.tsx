@@ -12,7 +12,6 @@ import { APP_CONFIG } from '../config/app';
 import { getStorageSize } from '../utils/storage';
 
 export function SettingsPage() {
-  const navigate = useNavigate();
   const { success, error } = useToast();
   const [settings, setSettings] = useLocalStorage<UserSettings>(
     'lottery_user_settings',
@@ -21,7 +20,7 @@ export function SettingsPage() {
   
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
-  const [notifications, setNotifications] = useState(settings.notifications);
+  const [notifications] = useState(settings.notifications);
 
   useEffect(() => {
     const [month, day] = settings.birthDate.split('-');

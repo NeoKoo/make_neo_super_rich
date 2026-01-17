@@ -1,13 +1,15 @@
+import { LotteryType } from './lottery';
+
 export interface HistoryRecord {
   id: string;
-  lotteryType: '双色球' | '大乐透';
+  lotteryType: LotteryType;
   lotteryId: string;
   numbers: {
     redBalls: number[];
     blueBalls: number[];
   };
   timestamp: number;
-  strategyType: 'balanced_odd_even' | 'sum_range' | 'full_random';
+  strategyType: 'balanced_odd_even' | 'sum_range' | 'full_random' | 'ai_god';
   drawDate?: string;
   drawNumbers?: {
     redBalls: number[];
@@ -22,7 +24,7 @@ export interface HistoryRecord {
 
 export interface DrawResult {
   lotteryId: string;
-  lotteryType: '双色球' | '大乐透';
+  lotteryType: LotteryType;
   drawDate: string;
   numbers: {
     redBalls: number[];
