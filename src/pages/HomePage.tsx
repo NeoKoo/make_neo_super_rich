@@ -98,7 +98,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen pb-32 bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
+    <div className="min-h-screen pb-20 bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
       <div className="px-4 pt-4 pb-32">
         <LotteryTypeBadge type={lotteryType} />
         
