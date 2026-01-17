@@ -11,12 +11,12 @@ interface NumberGridProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function NumberGrid({ 
-  title, 
-  min, 
-  max, 
-  selected, 
-  onSelect, 
+export function NumberGrid({
+  title,
+  min,
+  max,
+  selected,
+  onSelect,
   color,
   matched = [],
   size = 'md'
@@ -36,8 +36,8 @@ export function NumberGrid({
           {color === 'red' ? '🔴' : '🔵'} {selected.length}/{max - min + 1}
         </span>
       </div>
-      
-      <div className="grid grid-cols-8 gap-3">
+
+      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-3 sm:gap-4 justify-items-center">
         {numbers.map(num => (
           <NumberBall
             key={num}

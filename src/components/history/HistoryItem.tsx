@@ -1,6 +1,7 @@
 import { HistoryRecord } from '../../types/history';
 import { CopyButton } from '../common/CopyButton';
 import { ScratchCard } from '../scratch/ScratchCard';
+import { NumberBall } from '../lottery/NumberBall';
 import { useState } from 'react';
 
 interface HistoryItemProps {
@@ -10,7 +11,7 @@ interface HistoryItemProps {
 
 export function HistoryItem({ record, onDelete }: HistoryItemProps) {
   const [revealed, setRevealed] = useState(false);
-  
+
   const date = new Date(record.timestamp);
   const dateStr = date.toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -18,7 +19,7 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
     day: 'numeric',
     weekday: 'long'
   });
-  
+
   const redLabel = record.lotteryType === '双色球' ? '红球' : '前区';
   const blueLabel = record.lotteryType === '双色球' ? '蓝球' : '后区';
 
@@ -47,87 +48,77 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
           </span>
         </div>
       </div>
-      
+
       <div className="p-4">
         <div className="mb-4">
           <div className="text-sm text-text-secondary mb-2">您的号码：</div>
-          
-          <div className="mb-2">
+
+          <div className="mb-2 flex items-center flex-wrap gap-1">
             <span className="text-sm text-text-secondary mr-2">{redLabel}：</span>
-            {record.numbers.redBalls.map((num) => {
-              const isMatched = record.drawNumbers?.redBalls.includes(num);
-              return (
-                <span
-                  key={num}
-                  className={`
-                    inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold mr-1
-                    ${isMatched
-                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-ball-selected'
-                      : 'bg-gradient-to-br from-red-500 to-red-700 shadow-ball-normal'
-                    }
-                    text-white
-                  `}
-                >
-                  {num.toString().padStart(2, '0')}
-                </span>
-              );
-            })}
+            {record.numbers.redBalls.map((num) => (
+              <NumberBall
+                key={`hist-user-red-${num}`}
+                number={num}
+                selected={true}
+                color="red"
+                onClick={() => { }}
+                size="xs"
+                matched={record.drawNumbers?.redBalls.includes(num)}
+              />
+            ))}
           </div>
-          
-          <div>
+
+          <div className="flex items-center flex-wrap gap-1">
             <span className="text-sm text-text-secondary mr-2">{blueLabel}：</span>
-            {record.numbers.blueBalls.map((num) => {
-              const isMatched = record.drawNumbers?.blueBalls.includes(num);
-              return (
-                <span
-                  key={num}
-                  className={`
-                    inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold mr-1
-                    ${isMatched
-                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-ball-selected'
-                      : 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-ball-normal'
-                    }
-                    text-white
-                  `}
-                >
-                  {num.toString().padStart(2, '0')}
-                </span>
-              );
-            })}
+            {record.numbers.blueBalls.map((num) => (
+              <NumberBall
+                key={`hist-user-blue-${num}`}
+                number={num}
+                selected={true}
+                color="blue"
+                onClick={() => { }}
+                size="xs"
+                matched={record.drawNumbers?.blueBalls.includes(num)}
+              />
+            ))}
           </div>
         </div>
 
         {record.drawNumbers ? (
           <div className="mb-4">
-            <ScratchCard 
+            <ScratchCard
               coverText={`刮开查看${record.lotteryType}开奖号码`}
               revealed={revealed}
               onReveal={handleReveal}
             >
               <div className="p-3 bg-yellow-500/10 rounded-lg border-l-4 border-yellow-500">
                 <div className="text-sm text-yellow-500 font-semibold mb-2">🎯 开奖号码：</div>
-                
-                <div className="mb-2">
+
+                <div className="mb-2 flex items-center flex-wrap gap-1">
                   <span className="text-sm text-text-secondary mr-2">{redLabel}：</span>
                   {record.drawNumbers.redBalls.map(num => (
-                    <span
-                      key={num}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold mr-1 bg-gradient-to-br from-red-400 to-red-600 opacity-70 text-white"
-                    >
-                      {num.toString().padStart(2, '0')}
-                    </span>
+                    <NumberBall
+                      key={`hist-draw-red-${num}`}
+                      number={num}
+                      selected={true}
+                      color="red"
+                      onClick={() => { }}
+                      size="xs"
+                    />
                   ))}
                 </div>
-                
-                <div>
+
+                <div className="flex items-center flex-wrap gap-1">
                   <span className="text-sm text-text-secondary mr-2">{blueLabel}：</span>
                   {record.drawNumbers.blueBalls.map(num => (
-                    <span
-                      key={num}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold mr-1 bg-gradient-to-br from-blue-400 to-blue-600 opacity-70 text-white"
-                    >
-                      {num.toString().padStart(2, '0')}
-                    </span>
+                    <NumberBall
+                      key={`hist-draw-blue-${num}`}
+                      number={num}
+                      selected={true}
+                      color="blue"
+                      onClick={() => { }}
+                      size="xs"
+                    />
                   ))}
                 </div>
 
@@ -150,7 +141,7 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
           </div>
         )}
       </div>
-      
+
       <div className="px-4 pb-4">
         <CopyButton
           numbers={record.numbers}
