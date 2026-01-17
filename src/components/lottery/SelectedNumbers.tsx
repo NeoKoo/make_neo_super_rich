@@ -87,7 +87,6 @@ export function SelectedNumbers({
             
             <CopyButton 
               numbers={{ redBalls, blueBalls }}
-              lotteryType={lotteryType}
               variant="secondary"
             />
           </div>

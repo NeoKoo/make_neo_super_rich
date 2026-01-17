@@ -154,7 +154,6 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
       <div className="px-4 pb-4">
         <CopyButton
           numbers={record.numbers}
-          lotteryType={record.lotteryType}
           variant="ghost"
         />
       </div>

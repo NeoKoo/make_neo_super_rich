@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { HistoryRecord, DrawResult } from '../types/history';
-import { LotteryType } from '../types/lottery';
 import { fetchLatestDraw, fetchDrawByIssue, calculatePrize } from '../utils/lotteryAPI';
 import { getDrawFromCache, saveDrawToCache } from '../utils/drawCache';
 
@@ -64,20 +63,6 @@ export function useLotteryAPI() {
     }
   }, []);
 
-  const fetchLatestDrawInternal = useCallback(async (lotteryType: LotteryType): Promise<DrawResult | null> => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const result = await fetchLatestDraw(lotteryType);
-      return result;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '查询失败');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   return {
     loading,
