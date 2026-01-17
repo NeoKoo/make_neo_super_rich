@@ -18,7 +18,7 @@ export function TabBar() {
   const currentPath = location.pathname;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background-secondary border-t border-white/10 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background-secondary border-t border-white/10 z-40">
       <div className="flex justify-around items-center">
         {tabs.map(tab => (
           <Link

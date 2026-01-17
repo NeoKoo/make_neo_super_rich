@@ -24,8 +24,8 @@ export function SelectedNumbers({
   const blueLabel = lotteryType === '双色球' ? '蓝球' : '后区';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-30 pb-safe">
-      <div className="px-4 py-3">
+    <div className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-50 pb-safe">
+      <div className="px-4 py-3 pb-20">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             {redBalls.length > 0 && (
