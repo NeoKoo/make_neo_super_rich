@@ -120,7 +120,7 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
           <span className="text-2xl">🔮</span>
           <div>
             <div className="text-sm font-bold text-white">今日运势</div>
-            <div className="text-xs text-purple-200">{zodiacSign}座专属</div>
+            <div className="text-xs text-purple-200">Neo专属</div>
           </div>
         </div>
         <button
