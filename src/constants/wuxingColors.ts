@@ -32,7 +32,6 @@ export function calculateWuxing(birthDate: Date): WuxingType {
   const branch = earthlyBranches[branchIndex];
   
   const stemWuxingType = stemWuxing[stem];
-  const branchWuxingType = branchWuxing[branch];
   
   return stemWuxingType;
 }

@@ -54,7 +54,7 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
           
           <div className="mb-2">
             <span className="text-sm text-text-secondary mr-2">{redLabel}：</span>
-            {record.numbers.redBalls.map((num, idx) => {
+            {record.numbers.redBalls.map((num) => {
               const isMatched = record.drawNumbers?.redBalls.includes(num);
               return (
                 <span
@@ -76,7 +76,7 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
           
           <div>
             <span className="text-sm text-text-secondary mr-2">{blueLabel}：</span>
-            {record.numbers.blueBalls.map((num, idx) => {
+            {record.numbers.blueBalls.map((num) => {
               const isMatched = record.drawNumbers?.blueBalls.includes(num);
               return (
                 <span

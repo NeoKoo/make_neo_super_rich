@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { createPortal } from 'react-dom';
 
 interface ToastMessage {
   id: string;

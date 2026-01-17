@@ -9,7 +9,7 @@ interface DailyFortuneProps {
 }
 
 export function DailyFortune({ lotteryType }: DailyFortuneProps) {
-  const [settings, setSettings] = useLocalStorage(
+  const [settings] = useLocalStorage(
     'lottery_user_settings',
     APP_CONFIG.defaultSettings
   );

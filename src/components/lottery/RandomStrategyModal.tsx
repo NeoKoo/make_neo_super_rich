@@ -1,5 +1,4 @@
 import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
 import { STRATEGIES, RandomStrategyConfig, RandomStrategy } from '../../constants/randomStrategies';
 
 interface RandomStrategyModalProps {

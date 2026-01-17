@@ -6,11 +6,10 @@ interface CopyButtonProps {
     redBalls: number[];
     blueBalls: number[];
   };
-  lotteryType?: string;
   variant?: 'primary' | 'secondary' | 'ghost';
 }
 
-export function CopyButton({ numbers, lotteryType, variant = 'secondary' }: CopyButtonProps) {
+export function CopyButton({ numbers, variant = 'secondary' }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 

@@ -64,7 +64,7 @@ export function useLotteryAPI() {
     }
   }, []);
 
-  const fetchLatestDraw = useCallback(async (lotteryType: LotteryType): Promise<DrawResult | null> => {
+  const fetchLatestDrawInternal = useCallback(async (lotteryType: LotteryType): Promise<DrawResult | null> => {
     setLoading(true);
     setError(null);
     

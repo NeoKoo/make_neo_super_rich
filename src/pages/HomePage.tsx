@@ -67,7 +67,7 @@ export function HomePage() {
     const lotteryId = `${year}${month}${day}`;
 
     addHistory({
-      lotteryType: lotteryType as '双色球' | '大乐透',
+      lotteryType: lotteryType,
       lotteryId,
       numbers: { redBalls, blueBalls },
       timestamp: Date.now(),
