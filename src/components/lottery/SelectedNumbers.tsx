@@ -1,5 +1,6 @@
 import { CopyButton } from '../common/CopyButton';
 import { NumberBall } from './NumberBall';
+import { TreasureBowl } from '../animation/TreasureBowl';
 
 interface SelectedNumbersProps {
   redBalls: number[];
@@ -9,6 +10,8 @@ interface SelectedNumbersProps {
   isComplete: boolean;
   onSave: () => void;
   onRandom: () => void;
+  isExploding?: boolean;
+  onExplosionEnd?: () => void;
 }
 
 export function SelectedNumbers({
@@ -18,14 +21,28 @@ export function SelectedNumbers({
   lotteryType,
   isComplete,
   onSave,
-  onRandom
+  onRandom,
+  isExploding = false,
+  onExplosionEnd
 }: SelectedNumbersProps) {
   const redLabel = lotteryType === '双色球' ? '红球' : '前区';
   const blueLabel = lotteryType === '双色球' ? '蓝球' : '后区';
+  const isFull = isComplete;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-30 pb-safe mb-20">
-      <div className="px-4 py-3">
+    <div className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-30 pb-safe">
+      {/* 聚宝盆 */}
+      {!isExploding && (
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2">
+          <TreasureBowl 
+            isFull={isFull} 
+            isExploding={isExploding}
+            onExplosionEnd={onExplosionEnd}
+          />
+        </div>
+      )}
+      
+      <div className="px-4 py-3 pt-28">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             {redBalls.length > 0 && (
@@ -65,7 +82,7 @@ export function SelectedNumbers({
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <button
               onClick={onClear}
               className="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition-colors"

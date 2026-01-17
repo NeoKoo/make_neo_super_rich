@@ -31,9 +31,17 @@ export function NumberBall({
   const ringColor = color === 'red' ? 'ring-red-400' : 'ring-blue-400';
   const glowColor = color === 'red' ? 'shadow-red-500/50' : 'shadow-blue-500/50';
 
+  const handleClick = () => {
+    // 移动设备震动反馈
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={`
         ${sizeClasses[size]}

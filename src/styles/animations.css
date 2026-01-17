@@ -46,6 +46,62 @@
   }
 }
 
+/* 元宝掉落动画 */
+@keyframes ingot-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(300px) rotate(360deg) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(400px) rotate(720deg) scale(0.8);
+  }
+}
+
+/* 元宝进入聚宝盆动画 */
+@keyframes ingot-enter {
+  0% {
+    opacity: 1;
+    transform: translateY(-50px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 元宝爆炸动画 */
+@keyframes ingot-explode {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+/* 聚宝盆爆炸动画 */
+@keyframes explode {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
 .animate-coin-fall {
   animation: coin-fall 2s ease-in-out forwards;
 }
@@ -58,7 +114,40 @@
   animation: celebration-text 0.8s ease-out forwards;
 }
 
+.animate-ingot-fall {
+  animation: ingot-fall 1.5s ease-in forwards;
+}
+
+.animate-ingot {
+  animation: ingot-enter 0.5s ease-out forwards;
+}
+
+.animate-ingot-explode {
+  animation: ingot-explode 0.8s ease-out forwards;
+}
+
+.animate-explode {
+  animation: explode 1s ease-out forwards;
+}
+
 /* 文字发光效果 */
 .text-glow {
   text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
+
+/* 震动效果 */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out;
 }

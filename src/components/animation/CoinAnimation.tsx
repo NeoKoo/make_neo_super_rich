@@ -58,7 +58,7 @@ export function CoinAnimation({ trigger, type = 'small', onComplete }: CoinAnima
       {coins.map(coin => (
         <div
           key={coin.id}
-          className={`absolute animate-coin-fall ${
+          className={`absolute ${
             type === 'large' ? 'animate-coin-fall-large' : 'animate-coin-fall'
           }`}
           style={{

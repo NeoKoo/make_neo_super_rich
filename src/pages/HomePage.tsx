@@ -17,12 +17,13 @@ import { TabBar } from '../components/layout/TabBar';
 import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
+import { IngotFall } from '../components/animation/IngotFall';
 import { APP_CONFIG } from '../config/app';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { lotteryType, config } = useLotteryConfig();
-  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, coinTrigger } = useNumberSelection(config);
+  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, ingotTrigger } = useNumberSelection(config);
   const { luckyColor } = useLuckyColor();
   const { addHistory } = useHistory();
   const { generateNumbers } = useRandomNumbers();
@@ -34,7 +35,8 @@ export function HomePage() {
   
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [zodiacSign, setZodiacSign] = useState('');
-  const [showCelebration, setShowCelebration] = useState(false);
+  const [isExploding, setIsExploding] = useState(false);
+  const [showCoinsAfterExplosion, setShowCoinsAfterExplosion] = useState(false);
   
   useEffect(() => {
     const birthDate = settings.birthDate;
@@ -63,8 +65,13 @@ export function HomePage() {
       return;
     }
 
-    // 触发庆祝动画
-    setShowCelebration(true);
+    // 触发震动反馈
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]);
+    }
+
+    // 聚宝盆爆炸效果
+    setIsExploding(true);
 
     const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
@@ -82,10 +89,15 @@ export function HomePage() {
 
     success('保存成功');
     
-    // 延迟跳转到历史记录页，让用户看到庆祝动画
+    // 聚宝盆爆炸完成后，显示金币庆祝动画
+    setTimeout(() => {
+      setShowCoinsAfterExplosion(true);
+    }, 1000);
+    
+    // 延迟跳转到历史记录页，让用户看到所有动画
     setTimeout(() => {
       navigate('/history');
-    }, 3500);
+    }, 4500);
   };
 
   const handleAIRecommend = (redBalls: number[], blueBalls: number[]) => {
@@ -93,8 +105,12 @@ export function HomePage() {
     success('AI财神推荐成功');
   };
 
+  const handleExplosionEnd = () => {
+    setIsExploding(false);
+  };
+
   const handleCelebrationComplete = () => {
-    setShowCelebration(false);
+    setShowCoinsAfterExplosion(false);
   };
 
   return (
@@ -141,6 +157,8 @@ export function HomePage() {
         isComplete={isComplete}
         onSave={handleSave}
         onRandom={() => setShowStrategyModal(true)}
+        isExploding={isExploding}
+        onExplosionEnd={handleExplosionEnd}
       />
 
       <RandomStrategyModal
@@ -151,12 +169,14 @@ export function HomePage() {
 
       <TabBar />
 
-      {/* 选号时的金币动画 */}
-      <CoinAnimation trigger={coinTrigger > 0} type="small" />
+      {/* 选号时的元宝掉落动画 */}
+      <IngotFall 
+        trigger={ingotTrigger > 0} 
+      />
       
-      {/* 保存时的庆祝动画 */}
+      {/* 保存时的金币庆祝动画 */}
       <CoinAnimation 
-        trigger={showCelebration} 
+        trigger={showCoinsAfterExplosion} 
         type="large" 
         onComplete={handleCelebrationComplete}
       />

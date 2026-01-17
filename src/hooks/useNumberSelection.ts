@@ -4,10 +4,10 @@ import { LotteryConfig } from '../types/lottery';
 export function useNumberSelection(config: LotteryConfig) {
   const [redBalls, setRedBalls] = useState<number[]>([]);
   const [blueBalls, setBlueBalls] = useState<number[]>([]);
-  const [coinTrigger, setCoinTrigger] = useState(0);
+  const [ingotTrigger, setIngotTrigger] = useState(0);
 
-  const triggerCoinAnimation = useCallback(() => {
-    setCoinTrigger(prev => prev + 1);
+  const triggerIngotAnimation = useCallback(() => {
+    setIngotTrigger(prev => prev + 1);
   }, []);
 
   const toggleRedBall = useCallback((num: number) => {
@@ -20,12 +20,17 @@ export function useNumberSelection(config: LotteryConfig) {
         return prev;
       }
       
-      // 触发金币动画
-      triggerCoinAnimation();
+      // 触发元宝掉落动画
+      triggerIngotAnimation();
+      
+      // 触发震动反馈
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
       
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.redBalls.count, triggerCoinAnimation]);
+  }, [config.redBalls.count, triggerIngotAnimation]);
 
   const toggleBlueBall = useCallback((num: number) => {
     setBlueBalls(prev => {
@@ -37,12 +42,17 @@ export function useNumberSelection(config: LotteryConfig) {
         return prev;
       }
       
-      // 触发金币动画
-      triggerCoinAnimation();
+      // 触发元宝掉落动画
+      triggerIngotAnimation();
+      
+      // 触发震动反馈
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
       
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.blueBalls.count, triggerCoinAnimation]);
+  }, [config.blueBalls.count, triggerIngotAnimation]);
 
   const clearSelection = useCallback(() => {
     setRedBalls([]);
@@ -70,6 +80,6 @@ export function useNumberSelection(config: LotteryConfig) {
     isComplete,
     redProgress,
     blueProgress,
-    coinTrigger
+    ingotTrigger
   };
 }
