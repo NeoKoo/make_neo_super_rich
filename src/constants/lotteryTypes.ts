@@ -20,15 +20,18 @@ export const LOTTERY_CONFIGS: Record<LotteryType, LotteryConfig> = {
 export function getLotteryTypeByDate(date: Date): LotteryType {
   const dayOfWeek = date.getDay();
   
-  if ([1, 3, 6].includes(dayOfWeek)) {
+  // 双色球：周二(2)、周四(4)、周日(0) 开奖
+  if ([0, 2, 4].includes(dayOfWeek)) {
     return LotteryType.SHUANGSEQIU;
   }
   
-  if ([0, 2, 5].includes(dayOfWeek)) {
+  // 大乐透：周一(1)、周三(3)、周六(6) 开奖
+  if ([1, 3, 6].includes(dayOfWeek)) {
     return LotteryType.DALETOU;
   }
   
-  return LotteryType.SHUANGSEQIU;
+  // 周五(5)没有开奖，显示下一个开奖日（周六大乐透）
+  return LotteryType.DALETOU;
 }
 
 export function getNextDrawDate(lotteryType: LotteryType): Date {
