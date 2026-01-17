@@ -4,6 +4,11 @@ import { LotteryConfig } from '../types/lottery';
 export function useNumberSelection(config: LotteryConfig) {
   const [redBalls, setRedBalls] = useState<number[]>([]);
   const [blueBalls, setBlueBalls] = useState<number[]>([]);
+  const [coinTrigger, setCoinTrigger] = useState(0);
+
+  const triggerCoinAnimation = useCallback(() => {
+    setCoinTrigger(prev => prev + 1);
+  }, []);
 
   const toggleRedBall = useCallback((num: number) => {
     setRedBalls(prev => {
@@ -15,9 +20,12 @@ export function useNumberSelection(config: LotteryConfig) {
         return prev;
       }
       
+      // 触发金币动画
+      triggerCoinAnimation();
+      
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.redBalls.count]);
+  }, [config.redBalls.count, triggerCoinAnimation]);
 
   const toggleBlueBall = useCallback((num: number) => {
     setBlueBalls(prev => {
@@ -29,9 +37,12 @@ export function useNumberSelection(config: LotteryConfig) {
         return prev;
       }
       
+      // 触发金币动画
+      triggerCoinAnimation();
+      
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.blueBalls.count]);
+  }, [config.blueBalls.count, triggerCoinAnimation]);
 
   const clearSelection = useCallback(() => {
     setRedBalls([]);
@@ -58,6 +69,7 @@ export function useNumberSelection(config: LotteryConfig) {
     setNumbers,
     isComplete,
     redProgress,
-    blueProgress
+    blueProgress,
+    coinTrigger
   };
 }

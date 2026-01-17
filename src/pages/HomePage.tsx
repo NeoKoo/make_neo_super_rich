@@ -16,12 +16,13 @@ import { RandomStrategyModal } from '../components/lottery/RandomStrategyModal';
 import { TabBar } from '../components/layout/TabBar';
 import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
+import { CoinAnimation } from '../components/animation/CoinAnimation';
 import { APP_CONFIG } from '../config/app';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { lotteryType, config } = useLotteryConfig();
-  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete } = useNumberSelection(config);
+  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, coinTrigger } = useNumberSelection(config);
   const { luckyColor } = useLuckyColor();
   const { addHistory } = useHistory();
   const { generateNumbers } = useRandomNumbers();
@@ -33,6 +34,7 @@ export function HomePage() {
   
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [zodiacSign, setZodiacSign] = useState('');
+  const [showCelebration, setShowCelebration] = useState(false);
   
   useEffect(() => {
     const birthDate = settings.birthDate;
@@ -61,6 +63,9 @@ export function HomePage() {
       return;
     }
 
+    // 触发庆祝动画
+    setShowCelebration(true);
+
     const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -76,12 +81,20 @@ export function HomePage() {
     });
 
     success('保存成功');
-    navigate('/history');
+    
+    // 延迟跳转到历史记录页，让用户看到庆祝动画
+    setTimeout(() => {
+      navigate('/history');
+    }, 3500);
   };
 
   const handleAIRecommend = (redBalls: number[], blueBalls: number[]) => {
     setNumbers(redBalls, blueBalls);
     success('AI财神推荐成功');
+  };
+
+  const handleCelebrationComplete = () => {
+    setShowCelebration(false);
   };
 
   return (
@@ -137,6 +150,16 @@ export function HomePage() {
       />
 
       <TabBar />
+
+      {/* 选号时的金币动画 */}
+      <CoinAnimation trigger={coinTrigger > 0} type="small" />
+      
+      {/* 保存时的庆祝动画 */}
+      <CoinAnimation 
+        trigger={showCelebration} 
+        type="large" 
+        onComplete={handleCelebrationComplete}
+      />
     </div>
   );
 }

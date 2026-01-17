@@ -1,0 +1,64 @@
+/* 金币下落动画 */
+@keyframes coin-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-100vh) rotate(0deg) scale(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-80vh) rotate(90deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg) scale(0.5);
+  }
+}
+
+/* 大金币下落动画（更慢更明显） */
+@keyframes coin-fall-large {
+  0% {
+    opacity: 0;
+    transform: translateY(-100vh) rotate(0deg) scale(0);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-70vh) rotate(180deg) scale(1);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateY(100vh) rotate(1080deg) scale(0.8);
+  }
+}
+
+/* 庆祝文本动画 */
+@keyframes celebration-text {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-coin-fall {
+  animation: coin-fall 2s ease-in-out forwards;
+}
+
+.animate-coin-fall-large {
+  animation: coin-fall-large 4s ease-in-out forwards;
+}
+
+.animate-celebration-text {
+  animation: celebration-text 0.8s ease-out forwards;
+}
+
+/* 文字发光效果 */
+.text-glow {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
