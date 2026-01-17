@@ -1,5 +1,6 @@
 import { AI_CONFIG } from '../config/ai';
 import { LotteryType } from '../types/lottery';
+import { getLocalDateFromBeijing } from '../utils/dateUtils';
 
 interface ZhipuMessage {
   role: 'system' | 'user' | 'assistant';
@@ -29,7 +30,7 @@ export async function getAIRecommendation(
   birthDate: string
 ): Promise<LotteryRecommendation | null> {
   try {
-    const today = new Date();
+    const today = getLocalDateFromBeijing();
     const dateStr = today.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'long',

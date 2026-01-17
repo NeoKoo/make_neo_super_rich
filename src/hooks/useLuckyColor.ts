@@ -5,20 +5,22 @@ import { calculateLuckyColor } from '../utils/luckyColor';
 import { getFromStorage, saveToStorage } from '../utils/storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { APP_CONFIG } from '../config/app';
+import { getLocalDateFromBeijing } from '../utils/dateUtils';
 
 export function useLuckyColor() {
   const [luckyColor, setLuckyColor] = useState<LuckyColorResult>(() => {
     const settings = getFromStorage<UserSettings>(STORAGE_KEYS.USER_SETTINGS, APP_CONFIG.defaultSettings);
+    const currentDate = getLocalDateFromBeijing();
     return calculateLuckyColor(
-      new Date(new Date().getFullYear(), parseInt(settings.birthDate.split('-')[0]) - 1, parseInt(settings.birthDate.split('-')[1])),
-      new Date()
+      new Date(currentDate.getFullYear(), parseInt(settings.birthDate.split('-')[0]) - 1, parseInt(settings.birthDate.split('-')[1])),
+      currentDate
     );
   });
 
   const updateLuckyColor = useCallback((settings: UserSettings) => {
+    const currentDate = getLocalDateFromBeijing();
     const [month, day] = settings.birthDate.split('-').map(Number);
-    const birthDate = new Date(new Date().getFullYear(), month - 1, day);
-    const currentDate = new Date();
+    const birthDate = new Date(currentDate.getFullYear(), month - 1, day);
     
     const newLuckyColor = calculateLuckyColor(birthDate, currentDate);
     setLuckyColor(newLuckyColor);

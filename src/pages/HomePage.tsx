@@ -1,3 +1,4 @@
+import { getLocalDateFromBeijing } from '../utils/dateUtils';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLotteryConfig } from '../hooks/useLotteryConfig';
@@ -60,7 +61,7 @@ export function HomePage() {
       return;
     }
 
-    const today = new Date();
+    const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');

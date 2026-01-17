@@ -1,4 +1,5 @@
 import { AI_CONFIG } from '../config/ai';
+import { getLocalDateFromBeijing } from '../utils/dateUtils';
 
 interface ZhipuMessage {
   role: 'system' | 'user' | 'assistant';
@@ -29,7 +30,7 @@ export async function getDailyFortune(
   birthDate: string
 ): Promise<DailyFortune | null> {
   try {
-    const today = new Date();
+    const today = getLocalDateFromBeijing();
     const dateStr = today.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'long',
@@ -127,7 +128,7 @@ export function isLuckyTime(luckyTime: string): boolean {
     const [startHour, startMin] = start.split(':').map(Number);
     const [endHour, endMin] = end.split(':').map(Number);
     
-    const now = new Date();
+    const now = getLocalDateFromBeijing();
     const currentHour = now.getHours();
     const currentMin = now.getMinutes();
     
