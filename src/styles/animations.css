@@ -151,3 +151,318 @@
 .animate-shake {
   animation: shake 0.2s ease-in-out;
 }
+
+@keyframes dragonball-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(200px) rotate(180deg) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(400px) rotate(360deg) scale(0.5);
+  }
+}
+
+@keyframes dragonball-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dragonball-trail {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes dragonball-trail-delayed {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(0.7);
+  }
+}
+
+.animate-dragonball-fall {
+  animation: dragonball-fall 0.6s ease-out forwards;
+}
+
+.animate-dragonball-trail {
+  animation: dragonball-trail 0.3s ease-in-out infinite;
+}
+
+.animate-dragonball-trail-delayed {
+  animation: dragonball-trail-delayed 0.3s ease-in-out infinite 0.1s;
+}
+
+.animate-dragonball-rotate {
+  animation: dragonball-rotate 0.6s linear infinite;
+}
+
+@keyframes shenlong-particles {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-15px) translateX(10px);
+  }
+}
+
+@keyframes shenlong-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 50px rgba(255, 215, 0, 1));
+  }
+}
+
+@keyframes aura-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+    border-color: rgba(250, 204, 21, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+    border-color: rgba(250, 204, 21, 0.8);
+  }
+}
+
+@keyframes aura-pulse-delayed {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes aura-expand {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes aura-expand-delayed {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes shenlong-rise {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes wish-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dragon-breath {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) translateY(-5px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes light-beam {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  50% {
+    opacity: 1;
+    height: 160px;
+  }
+  100% {
+    opacity: 0.3;
+    height: 160px;
+  }
+}
+
+@keyframes light-beam-delayed {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  50% {
+    opacity: 0.8;
+    height: 128px;
+  }
+  100% {
+    opacity: 0.2;
+    height: 128px;
+  }
+}
+
+@keyframes light-beam-alt {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  50% {
+    opacity: 0.8;
+    height: 144px;
+  }
+  100% {
+    opacity: 0.2;
+    height: 144px;
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(360deg);
+  }
+}
+
+@keyframes thunder-flash {
+  0%, 100% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.6;
+  }
+  40% {
+    opacity: 0;
+  }
+}
+
+.animate-shenlong-particles {
+  animation: shenlong-particles 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+.animate-shenlong-glow {
+  animation: shenlong-glow 2s ease-in-out infinite;
+}
+
+.animate-aura-pulse {
+  animation: aura-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-aura-pulse-delayed {
+  animation: aura-pulse-delayed 1.5s ease-in-out infinite 0.3s;
+}
+
+.animate-aura-expand {
+  animation: aura-expand 1s ease-out forwards;
+}
+
+.animate-aura-expand-delayed {
+  animation: aura-expand-delayed 1s ease-out forwards 0.2s;
+}
+
+.animate-shenlong-rise {
+  animation: shenlong-rise 2s ease-in-out infinite;
+}
+
+.animate-wish-appear {
+  animation: wish-appear 0.8s ease-out forwards;
+}
+
+.animate-dragon-breath {
+  animation: dragon-breath 1s ease-in-out infinite;
+}
+
+.animate-light-beam {
+  animation: light-beam 1s ease-out forwards;
+}
+
+.animate-light-beam-delayed {
+  animation: light-beam-delayed 1s ease-out forwards 0.2s;
+}
+
+.animate-light-beam-alt {
+  animation: light-beam-alt 1s ease-out forwards 0.4s;
+}
+
+@keyframes sparkle-burst {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-sparkle-burst {
+  animation: sparkle-burst 0.5s ease-out forwards;
+}
+
+.animate-thunder-flash {
+  animation: thunder-flash 0.5s ease-out forwards;
+}

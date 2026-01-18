@@ -17,12 +17,14 @@ import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
 import { IngotFall } from '../components/animation/IngotFall';
+import { DragonBallAnimation } from '../components/animation/DragonBallAnimation';
+import { ShenlongSummon } from '../components/animation/ShenlongSummon';
 import { APP_CONFIG } from '../config/app';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { lotteryType, config } = useLotteryConfig();
-  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, ingotTrigger } = useNumberSelection(config);
+  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, ingotTrigger, dragonBallTrigger } = useNumberSelection(config);
   const { luckyColor } = useLuckyColor();
   const { addHistory } = useHistory();
   const { generateNumbers } = useRandomNumbers();
@@ -36,6 +38,7 @@ export function HomePage() {
   const [zodiacSign, setZodiacSign] = useState('');
   const [isExploding, setIsExploding] = useState(false);
   const [showCoinsAfterExplosion, setShowCoinsAfterExplosion] = useState(false);
+  const [showShenlongSummon, setShowShenlongSummon] = useState(false);
   
   useEffect(() => {
     const birthDate = settings.birthDate;
@@ -64,12 +67,10 @@ export function HomePage() {
       return;
     }
 
-    // 触发震动反馈
     if ('vibrate' in navigator) {
       navigator.vibrate([100, 50, 100]);
     }
 
-    // 聚宝盆爆炸效果
     setIsExploding(true);
 
     const today = getLocalDateFromBeijing();
@@ -87,16 +88,15 @@ export function HomePage() {
     });
 
     success('保存成功');
-    
-    // 聚宝盆爆炸完成后，显示金币庆祝动画
+
     setTimeout(() => {
       setShowCoinsAfterExplosion(true);
+      setShowShenlongSummon(true);
     }, 1000);
-    
-    // 延迟跳转到历史记录页，让用户看到所有动画
+
     setTimeout(() => {
       navigate('/history');
-    }, 4500);
+    }, 5500);
   };
 
   const handleAIRecommend = (redBalls: number[], blueBalls: number[]) => {
@@ -112,9 +112,13 @@ export function HomePage() {
     setShowCoinsAfterExplosion(false);
   };
 
+  const handleShenlongComplete = () => {
+    setShowShenlongSummon(false);
+  };
+
   return (
-    <div className="min-h-screen bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
-      <div className="px-4 pt-4 pb-80 sm:pb-60">
+    <div className="min-h-screen bg-background-primary pb-safe" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
+      <div className="px-4 pt-4 pb-48 sm:pb-40">
         <LotteryTypeBadge type={lotteryType} />
         
         <DailyFortune lotteryType={lotteryType} />
@@ -166,16 +170,23 @@ export function HomePage() {
         onSelectStrategy={handleRandom}
       />
 
-      {/* 选号时的元宝掉落动画 */}
-      <IngotFall 
-        trigger={ingotTrigger > 0} 
+      <IngotFall
+        trigger={ingotTrigger > 0}
       />
-      
-      {/* 保存时的金币庆祝动画 */}
-      <CoinAnimation 
-        trigger={showCoinsAfterExplosion} 
-        type="large" 
+
+      <DragonBallAnimation
+        trigger={dragonBallTrigger > 0}
+      />
+
+      <CoinAnimation
+        trigger={showCoinsAfterExplosion}
+        type="large"
         onComplete={handleCelebrationComplete}
+      />
+
+      <ShenlongSummon
+        trigger={showShenlongSummon}
+        onComplete={handleShenlongComplete}
       />
     </div>
   );

@@ -5,9 +5,14 @@ export function useNumberSelection(config: LotteryConfig) {
   const [redBalls, setRedBalls] = useState<number[]>([]);
   const [blueBalls, setBlueBalls] = useState<number[]>([]);
   const [ingotTrigger, setIngotTrigger] = useState(0);
+  const [dragonBallTrigger, setDragonBallTrigger] = useState(0);
 
   const triggerIngotAnimation = useCallback(() => {
     setIngotTrigger(prev => prev + 1);
+  }, []);
+
+  const triggerDragonBallAnimation = useCallback(() => {
+    setDragonBallTrigger(prev => prev + 1);
   }, []);
 
   const toggleRedBall = useCallback((num: number) => {
@@ -15,44 +20,36 @@ export function useNumberSelection(config: LotteryConfig) {
       if (prev.includes(num)) {
         return prev.filter(n => n !== num);
       }
-      
+
       if (prev.length >= config.redBalls.count) {
         return prev;
       }
-      
-      // 触发元宝掉落动画
+
       triggerIngotAnimation();
-      
-      // 触发震动反馈
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
-      
+      triggerDragonBallAnimation();
+      navigator.vibrate(50);
+
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.redBalls.count, triggerIngotAnimation]);
+  }, [config.redBalls.count, triggerIngotAnimation, triggerDragonBallAnimation]);
 
   const toggleBlueBall = useCallback((num: number) => {
     setBlueBalls(prev => {
       if (prev.includes(num)) {
         return prev.filter(n => n !== num);
       }
-      
+
       if (prev.length >= config.blueBalls.count) {
         return prev;
       }
-      
-      // 触发元宝掉落动画
+
       triggerIngotAnimation();
-      
-      // 触发震动反馈
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
-      
+      triggerDragonBallAnimation();
+      navigator.vibrate(50);
+
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.blueBalls.count, triggerIngotAnimation]);
+  }, [config.blueBalls.count, triggerIngotAnimation, triggerDragonBallAnimation]);
 
   const clearSelection = useCallback(() => {
     setRedBalls([]);
@@ -64,9 +61,9 @@ export function useNumberSelection(config: LotteryConfig) {
     setBlueBalls(blueBalls);
   }, []);
 
-  const isComplete = redBalls.length === config.redBalls.count && 
+  const isComplete = redBalls.length === config.redBalls.count &&
                     blueBalls.length === config.blueBalls.count;
-  
+
   const redProgress = `${redBalls.length}/${config.redBalls.count}`;
   const blueProgress = `${blueBalls.length}/${config.blueBalls.count}`;
 
@@ -80,6 +77,7 @@ export function useNumberSelection(config: LotteryConfig) {
     isComplete,
     redProgress,
     blueProgress,
-    ingotTrigger
+    ingotTrigger,
+    dragonBallTrigger
   };
 }

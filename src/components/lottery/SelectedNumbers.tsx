@@ -37,7 +37,7 @@ export function SelectedNumbers({
 
       {/* 聚宝盆 */}
       {!isExploding && (
-        <div className="absolute -top-36 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute -top-28 left-1/2 -translate-x-1/2 z-10">
           <TreasureBowl
             isFull={isFull}
             isExploding={isExploding}
@@ -46,8 +46,8 @@ export function SelectedNumbers({
         </div>
       )}
 
-      <div className="px-4 py-3 pt-36 relative">
-        <div className="flex items-center justify-between gap-4">
+      <div className="px-4 py-2 sm:py-3 pt-28 relative">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             {redBalls.length > 0 && (
               <div className="flex items-center gap-2 mb-2">
@@ -86,36 +86,36 @@ export function SelectedNumbers({
             )}
           </div>
 
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
             <button
               onClick={onClear}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-700/80 hover:bg-gray-600 text-white text-sm transition-all duration-300 hover:scale-105"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-gray-700/80 hover:bg-gray-600 text-white text-xs sm:text-sm transition-all duration-300 hover:scale-105"
             >
-              <Trash2 className="w-4 h-4" />
-              清除
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">清除</span>
             </button>
 
             <button
               onClick={onRandom}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/25"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white text-xs sm:text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/25"
             >
-              <Dices className="w-4 h-4" />
-              随机
+              <Dices className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">随机</span>
             </button>
 
             <button
               onClick={onSave}
               disabled={!isComplete}
               className={`
-                flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-300
+                flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300
                 ${isComplete
                   ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-lg shadow-green-500/25 hover:scale-105'
                   : 'bg-gray-600/80 text-text-muted cursor-not-allowed'
                 }
               `}
             >
-              <Save className="w-4 h-4" />
-              保存
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">保存</span>
             </button>
 
             <CopyButton
