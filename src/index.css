@@ -150,6 +150,11 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 @keyframes aurora-move {
   0%, 100% {
     transform: translate(0, 0) rotate(0deg);
