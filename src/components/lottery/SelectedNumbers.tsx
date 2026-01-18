@@ -33,7 +33,7 @@ export function SelectedNumbers({
     <div className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-30 pb-safe">
       {/* 聚宝盆 */}
       {!isExploding && (
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2">
+        <div className="absolute -top-36 left-1/2 -translate-x-1/2 z-10">
           <TreasureBowl 
             isFull={isFull} 
             isExploding={isExploding}
@@ -42,7 +42,7 @@ export function SelectedNumbers({
         </div>
       )}
       
-      <div className="px-4 py-3 pt-28">
+      <div className="px-4 py-3 pt-36">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             {redBalls.length > 0 && (

@@ -1,0 +1,42 @@
+/* 响应式布局检查清单 */
+
+/* 手机端 (默认，max-width: 767px) */
+/* 
+   ✓ 内容区域padding-bottom: 240px (pb-60)
+   ✓ SelectedNumbers: fixed bottom-0, z-30
+   ✓ TabBar: fixed bottom-0, z-40
+   ✓ 聚宝盆: -top-36 (-144px)
+   ✓ SelectedNumbers内容区: pt-36 (144px)
+   ✓ 总计底部预留空间: ~380px
+*/
+
+/* 平板端 (768px - 1023px) */
+@media (min-width: 768px) {
+  /* 可以适当减小padding，因为屏幕更大 */
+  .responsive-padding {
+    padding-bottom: 300px;
+  }
+}
+
+/* 桌面端 (min-width: 1024px) */
+@media (min-width: 1024px) {
+  /* 桌面端可以使用更大的padding或调整布局 */
+  .responsive-padding {
+    padding-bottom: 240px;
+  }
+}
+
+/* 通用规则 */
+.no-overflow {
+  overflow: visible;
+}
+
+/* 确保fixed元素不遮挡内容 */
+.content-with-fixed {
+  padding-bottom: 400px; /* 为所有fixed元素预留足够空间 */
+}
+
+/* TabBar高度: 60px */
+/* SelectedNumbers高度: ~100px + 聚宝盆 ~150px */
+/* 总计底部占用: ~310px */
+/* 安全padding: 380-400px */
