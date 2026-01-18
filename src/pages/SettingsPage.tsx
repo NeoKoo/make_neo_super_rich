@@ -69,7 +69,7 @@ export function SettingsPage() {
   const storageSize = getStorageSize();
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-24 sm:pb-20">
       <Header
         title="设置"
         showBack
@@ -82,7 +82,7 @@ export function SettingsPage() {
         }
       />
 
-      <div className="px-4 pt-4 pb-32 space-y-6">
+      <div className="px-4 pt-4 pb-36 sm:pb-32 space-y-6">
         {/* 个人信息 */}
         <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-3 mb-4">

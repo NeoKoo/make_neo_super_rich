@@ -19,7 +19,7 @@ export function TabBar() {
   const currentPath = location.pathname;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-background-secondary/95 to-background-secondary/80 backdrop-blur-xl border-t border-white/10">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-background-secondary/95 to-background-secondary/80 backdrop-blur-xl border-t border-white/10">
       <div className="flex justify-around items-center py-2">
         {tabs.map(tab => {
           const isActive = currentPath === tab.path;

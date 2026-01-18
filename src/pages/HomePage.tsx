@@ -13,7 +13,6 @@ import { LotteryTypeBadge } from '../components/lottery/LotteryTypeBadge';
 import { NumberGrid } from '../components/lottery/NumberGrid';
 import { SelectedNumbers } from '../components/lottery/SelectedNumbers';
 import { RandomStrategyModal } from '../components/lottery/RandomStrategyModal';
-import { TabBar } from '../components/layout/TabBar';
 import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
@@ -114,8 +113,8 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen pb-20 bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
-      <div className="px-4 pt-4 pb-60">
+    <div className="min-h-screen bg-background-primary" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
+      <div className="px-4 pt-4 pb-80 sm:pb-60">
         <LotteryTypeBadge type={lotteryType} />
         
         <DailyFortune lotteryType={lotteryType} />
@@ -166,8 +165,6 @@ export function HomePage() {
         onClose={() => setShowStrategyModal(false)}
         onSelectStrategy={handleRandom}
       />
-
-      <TabBar />
 
       {/* 选号时的元宝掉落动画 */}
       <IngotFall 

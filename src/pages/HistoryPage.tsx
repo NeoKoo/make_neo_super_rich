@@ -41,7 +41,7 @@ export function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-24 sm:pb-20">
       <Header
         title="历史记录"
         showBack
@@ -67,7 +67,7 @@ export function HistoryPage() {
         }
       />
 
-      <div className="px-4 pt-4 pb-32">
+      <div className="px-4 pt-4 pb-36 sm:pb-32">
         {history.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
