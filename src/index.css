@@ -138,98 +138,98 @@
   .animate-bounce-slow {
     animation: bounce 2s ease-in-out infinite;
   }
-}
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-@keyframes pop {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
+  @keyframes pop {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
 
-@keyframes aurora-move {
-  0%, 100% {
-    transform: translate(0, 0) rotate(0deg);
+  @keyframes aurora-move {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(2%, 2%) rotate(1deg);
+    }
+    50% {
+      transform: translate(0, 4%) rotate(0deg);
+    }
+    75% {
+      transform: translate(-2%, 2%) rotate(-1deg);
+    }
   }
-  25% {
-    transform: translate(2%, 2%) rotate(1deg);
-  }
-  50% {
-    transform: translate(0, 4%) rotate(0deg);
-  }
-  75% {
-    transform: translate(-2%, 2%) rotate(-1deg);
-  }
-}
 
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.2);
+    }
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-}
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
-  100% {
-    transform: translateX(100%);
-  }
-}
 
-/* 脉动动画 */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  /* 脉动动画 */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(124, 58, 237, 0.5);
+    }
   }
-  50% {
-    box-shadow: 0 0 40px rgba(124, 58, 237, 0.5);
-  }
-}
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* 摇摆动画 */
-@keyframes sway {
-  0%, 100% {
-    transform: rotate(-3deg);
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
   }
-  50% {
-    transform: rotate(3deg);
-  }
-}
 
-.animate-sway {
-  animation: sway 3s ease-in-out infinite;
-}
-
-/* 浮动动画 */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
+  /* 摇摆动画 */
+  @keyframes sway {
+    0%, 100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(3deg);
+    }
   }
-  50% {
-    transform: translateY(-10px);
-  }
-}
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+  .animate-sway {
+    animation: sway 3s ease-in-out infinite;
+  }
+
+  /* 浮动动画 */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
 }
 
 /* 响应式调整 */
