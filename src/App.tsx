@@ -10,13 +10,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-background-primary text-text-primary">
+      {/* 极光背景层 */}
+      <div className="aurora-bg" />
+
+      <div className="min-h-screen bg-transparent text-text-primary relative">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
-        
+
         <Toast toasts={toasts} onRemove={removeToast} />
       </div>
     </BrowserRouter>

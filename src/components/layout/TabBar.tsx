@@ -1,16 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Target, History, Settings } from 'lucide-react';
 
 interface TabItem {
   id: string;
   label: string;
-  icon: string;
+  icon: React.ElementType;
   path: string;
 }
 
 const tabs: TabItem[] = [
-  { id: 'home', label: '选号', icon: '🎯', path: '/' },
-  { id: 'history', label: '历史', icon: '📜', path: '/history' },
-  { id: 'settings', label: '设置', icon: '⚙️', path: '/settings' }
+  { id: 'home', label: '选号', icon: Target, path: '/' },
+  { id: 'history', label: '历史', icon: History, path: '/history' },
+  { id: 'settings', label: '设置', icon: Settings, path: '/settings' }
 ];
 
 export function TabBar() {
@@ -18,25 +19,44 @@ export function TabBar() {
   const currentPath = location.pathname;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background-secondary border-t border-white/10 z-40">
-      <div className="flex justify-around items-center">
-        {tabs.map(tab => (
-          <Link
-            key={tab.id}
-            to={tab.path}
-            className={`
-              flex flex-col items-center py-2 px-4 flex-1
-              ${currentPath === tab.path 
-                ? 'text-primary' 
-                : 'text-text-secondary hover:text-text-primary'
-              }
-              transition-colors duration-200
-            `}
-          >
-            <span className="text-2xl mb-1">{tab.icon}</span>
-            <span className="text-xs">{tab.label}</span>
-          </Link>
-        ))}
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-background-secondary/95 to-background-secondary/80 backdrop-blur-xl border-t border-white/10">
+      <div className="flex justify-around items-center py-2">
+        {tabs.map(tab => {
+          const isActive = currentPath === tab.path;
+          return (
+            <Link
+              key={tab.id}
+              to={tab.path}
+              className={`
+                flex flex-col items-center py-2 px-4 flex-1
+                transition-all duration-300
+                ${isActive
+                  ? 'text-primary'
+                  : 'text-text-secondary hover:text-text-primary'
+                }
+              `}
+            >
+              <div className={`
+                p-2 rounded-xl transition-all duration-300
+                ${isActive
+                  ? 'bg-primary/20 shadow-lg shadow-primary/20'
+                  : 'hover:bg-white/5'
+                }
+              `}>
+                <tab.icon
+                  className={`w-6 h-6 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+              </div>
+              <span className={`text-xs mt-1 font-medium ${isActive ? 'text-primary' : ''}`}>
+                {tab.label}
+              </span>
+              {isActive && (
+                <div className="absolute bottom-0 w-8 h-1 bg-primary rounded-full shadow-lg shadow-primary/50" />
+              )}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

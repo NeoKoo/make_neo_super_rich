@@ -3,6 +3,7 @@ import { getDailyFortune, isLuckyTime } from '../../utils/fortuneService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { APP_CONFIG } from '../../config/app';
 import { LotteryType } from '../../types/lottery';
+import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle } from 'lucide-react';
 
 interface DailyFortuneProps {
   lotteryType: LotteryType;
@@ -78,10 +79,12 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 mb-4">
-        <div className="flex items-center justify-center gap-2">
-          <span className="animate-spin text-xl">🔮</span>
-          <span className="text-sm text-purple-200">正在获取运势...</span>
+      <div className="relative overflow-hidden bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-fuchsia-500/20 rounded-2xl p-5 mb-4 border border-purple-400/20">
+        {/* 动画背景 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent animate-[shimmer_2s_infinite]" />
+        <div className="flex items-center justify-center gap-3 relative z-10">
+          <Sparkles className="w-5 h-5 text-purple-400 animate-spin" />
+          <span className="text-sm text-purple-200">正在获取今日运势...</span>
         </div>
       </div>
     );
@@ -89,17 +92,19 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
 
   if (error) {
     return (
-      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 mb-4">
+      <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-2xl p-4 mb-4 border border-red-400/20">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚠️</span>
-            <span className="text-sm text-purple-200">{error}</span>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-500/20 rounded-lg">
+              <Sparkle className="w-5 h-5 text-red-400" />
+            </div>
+            <span className="text-sm text-red-200">{error}</span>
           </div>
           <button
             onClick={handleRefresh}
-            className="text-purple-300 hover:text-white text-sm transition-colors"
+            className="p-2 hover:bg-white/5 rounded-lg transition-colors"
           >
-            🔄
+            <RefreshCw className="w-5 h-5 text-red-300 hover:text-white transition-colors" />
           </button>
         </div>
       </div>
@@ -113,68 +118,80 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
   const isNowLucky = isLuckyTime(fortune.luckyTime);
 
   return (
-    <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-xl p-4 mb-4 border border-purple-400/30">
+    <div className="relative overflow-hidden bg-gradient-to-br from-violet-500/20 via-purple-500/15 to-fuchsia-500/20 rounded-2xl p-5 mb-4 border border-purple-400/30 shadow-xl shadow-purple-500/10">
+      {/* 装饰性光晕 */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl" />
+      <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-fuchsia-500/20 rounded-full blur-3xl" />
+
       {/* 头部 */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🔮</span>
+      <div className="flex items-center justify-between mb-4 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-gradient-to-br from-purple-500/30 to-fuchsia-500/30 rounded-xl border border-purple-400/30">
+            <Sparkles className="w-6 h-6 text-purple-300" />
+          </div>
           <div>
-            <div className="text-sm font-bold text-white">今日运势</div>
-            <div className="text-xs text-purple-200">Neo专属</div>
+            <div className="text-base font-bold text-white">今日运势</div>
+            <div className="text-xs text-purple-300/80">Neo专属好运指南</div>
           </div>
         </div>
         <button
           onClick={handleRefresh}
-          className="text-purple-300 hover:text-white transition-colors"
+          className="p-2 hover:bg-white/5 rounded-lg transition-colors"
           title="刷新运势"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <RefreshCw className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
         </button>
       </div>
 
       {/* 祝福语 */}
-      <div className="mb-3">
-        <div className="flex items-start gap-2">
-          <span className="text-xl">✨</span>
-          <p className="text-base text-white leading-relaxed">
+      <div className="mb-4 relative z-10">
+        <div className="flex items-start gap-2.5">
+          <Star className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <p className="text-base text-white leading-relaxed font-medium">
             {fortune.blessing}
           </p>
         </div>
       </div>
 
       {/* 幸运时间 */}
-      <div className={`mb-3 p-3 rounded-lg ${
-        isNowLucky
-          ? 'bg-gradient-to-r from-yellow-400 to-orange-400 shadow-lg'
-          : 'bg-purple-900/50'
-      }`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className={isNowLucky ? 'animate-pulse text-2xl' : 'text-2xl'}>
-              {isNowLucky ? '🌟' : '🕐'}
-            </span>
+      <div className={`
+        relative overflow-hidden rounded-xl p-4 mb-4
+        ${isNowLucky
+          ? 'bg-gradient-to-r from-amber-500/90 via-yellow-500/90 to-orange-500/90 shadow-lg shadow-amber-500/30'
+          : 'bg-gradient-to-r from-purple-900/60 to-violet-900/60 border border-purple-400/20'
+        }
+      `}>
+        {isNowLucky && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]" />
+        )}
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className={`
+              p-2 rounded-lg
+              ${isNowLucky ? 'bg-white/20' : 'bg-purple-500/30'}
+            `}>
+              <Clock className={`w-5 h-5 ${isNowLucky ? 'text-white' : 'text-purple-300'}`} />
+            </div>
             <div>
-              <div className="text-sm font-semibold text-white">
-                {isNowLucky ? '现在就是幸运时间！' : '今日最佳购彩时间'}
+              <div className={`text-sm font-semibold ${isNowLucky ? 'text-white' : 'text-purple-200'}`}>
+                {isNowLucky ? '✨ 现在就是幸运时间！' : '今日最佳购彩时间'}
               </div>
-              <div className={`text-lg font-bold ${isNowLucky ? 'text-white' : 'text-yellow-300'}`}>
+              <div className={`text-lg font-bold ${isNowLucky ? 'text-white' : 'text-amber-300'}`}>
                 {fortune.luckyTime}
               </div>
             </div>
           </div>
           {isNowLucky && (
             <div className="animate-bounce">
-              <span className="text-2xl">🎯</span>
+              <Sparkles className="w-8 h-8 text-white/80" />
             </div>
           )}
         </div>
       </div>
 
       {/* 幸运原因 */}
-      <div className="flex items-start gap-2 text-sm text-purple-200">
-        <span>📖</span>
+      <div className="flex items-start gap-2.5 text-sm text-purple-200/80 relative z-10">
+        <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p>{fortune.reason}</p>
       </div>
     </div>

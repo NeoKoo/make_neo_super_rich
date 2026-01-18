@@ -1,6 +1,7 @@
 import { CopyButton } from '../common/CopyButton';
 import { NumberBall } from './NumberBall';
 import { TreasureBowl } from '../animation/TreasureBowl';
+import { Trash2, Save, Dices } from 'lucide-react';
 
 interface SelectedNumbersProps {
   redBalls: number[];
@@ -30,19 +31,22 @@ export function SelectedNumbers({
   const isFull = isComplete;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-30 pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 z-30 pb-safe">
+      {/* 玻璃背景 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-background-secondary/95 to-background-secondary/80 backdrop-blur-xl border-t border-white/10" />
+
       {/* 聚宝盆 */}
       {!isExploding && (
         <div className="absolute -top-36 left-1/2 -translate-x-1/2 z-10">
-          <TreasureBowl 
-            isFull={isFull} 
+          <TreasureBowl
+            isFull={isFull}
             isExploding={isExploding}
             onExplosionEnd={onExplosionEnd}
           />
         </div>
       )}
-      
-      <div className="px-4 py-3 pt-36">
+
+      <div className="px-4 py-3 pt-36 relative">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             {redBalls.length > 0 && (
@@ -85,30 +89,33 @@ export function SelectedNumbers({
           <div className="flex gap-2 flex-shrink-0">
             <button
               onClick={onClear}
-              className="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-700/80 hover:bg-gray-600 text-white text-sm transition-all duration-300 hover:scale-105"
             >
+              <Trash2 className="w-4 h-4" />
               清除
             </button>
 
             <button
               onClick={onRandom}
-              className="px-3 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-semibold transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/25"
             >
-              🎲 随机
+              <Dices className="w-4 h-4" />
+              随机
             </button>
 
             <button
               onClick={onSave}
               disabled={!isComplete}
               className={`
-                px-3 py-2 rounded-lg text-sm font-semibold transition-colors
+                flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-300
                 ${isComplete
-                  ? 'bg-success hover:bg-green-600 text-white'
-                  : 'bg-gray-600 text-text-muted cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-lg shadow-green-500/25 hover:scale-105'
+                  : 'bg-gray-600/80 text-text-muted cursor-not-allowed'
                 }
               `}
             >
-              💾 保存
+              <Save className="w-4 h-4" />
+              保存
             </button>
 
             <CopyButton

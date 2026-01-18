@@ -4,20 +4,20 @@
 
 :root {
   /* Rich Premium Palette */
-  --primary-color: #ffd700;
-  --primary-light: #ffe44d;
-  --primary-dark: #b8860b;
-  
-  --secondary-color: #9b59b6;
-  
-  --background-primary: #0f172a;
-  --background-secondary: #1e293b;
-  --background-tertiary: #334155;
-  
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  
+  --primary-color: #7C3AED;
+  --primary-light: #A78BFA;
+  --primary-dark: #5B21B6;
+
+  --secondary-color: #F59E0B;
+
+  --background-primary: #0F0F23;
+  --background-secondary: #1E1B4B;
+  --background-tertiary: #312E81;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #64748B;
+
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(255, 255, 255, 0.05);
 }
@@ -25,11 +25,21 @@
 @layer base {
   body {
     @apply bg-slate-950 text-text-primary antialiased;
-    background-image: 
-      radial-gradient(circle at 50% 0%, #1e1b4b 0%, transparent 60%),
-      radial-gradient(circle at 0% 50%, #312e81 0%, transparent 50%),
-      radial-gradient(circle at 100% 50%, #4c1d95 0%, transparent 50%);
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 0% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 100% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(244, 63, 94, 0.08) 0%, transparent 40%);
     background-attachment: fixed;
+  }
+
+  /* 字体设置 */
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Chakra Petch', system-ui, sans-serif;
   }
 }
 
@@ -37,12 +47,12 @@
   .glass-panel {
     @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-xl;
   }
-  
+
   .glass-orb {
     @apply relative overflow-hidden backdrop-blur-md border border-white/20 shadow-lg;
     background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
   }
-  
+
   .glass-orb::before {
     content: '';
     @apply absolute top-0 left-0 w-full h-full;
@@ -53,15 +63,80 @@
   .text-glow {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   }
+
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  }
+
+  /* 极光背景效果 */
+  .aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .aurora-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 60%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 30%),
+      radial-gradient(ellipse at 20% 50%, rgba(244, 63, 94, 0.06) 0%, transparent 30%);
+    animation: aurora-move 20s ease-in-out infinite;
+  }
+
+  .aurora-bg::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse at 60% 30%, rgba(124, 58, 237, 0.08) 0%, transparent 35%),
+      radial-gradient(ellipse at 40% 70%, rgba(245, 158, 11, 0.05) 0%, transparent 35%);
+    animation: aurora-move 25s ease-in-out infinite reverse;
+  }
+
+  /* 星光闪烁效果 */
+  .star-twinkle {
+    animation: twinkle 4s ease-in-out infinite;
+  }
+
+  /* 光泽动画 */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
+    transform: skewX(-20deg);
+  }
 }
 
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.4s ease-out;
   }
-  
+
   .animate-pop {
     animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 2s ease-in-out infinite;
   }
 }
 
@@ -73,4 +148,89 @@
 @keyframes pop {
   0% { transform: scale(0.9); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes aurora-move {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(2%, 2%) rotate(1deg);
+  }
+  50% {
+    transform: translate(0, 4%) rotate(0deg);
+  }
+  75% {
+    transform: translate(-2%, 2%) rotate(-1deg);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 脉动动画 */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.5);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* 摇摆动画 */
+@keyframes sway {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-sway {
+  animation: sway 3s ease-in-out infinite;
+}
+
+/* 浮动动画 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .aurora-bg::before,
+  .aurora-bg::after {
+    animation-duration: 30s;
+  }
 }

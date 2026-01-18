@@ -6,17 +6,18 @@ import { Header } from '../components/layout/Header';
 import { HistoryItem } from '../components/history/HistoryItem';
 import { Loading } from '../components/common/Loading';
 import { TabBar } from '../components/layout/TabBar';
+import { RefreshCw, Trash2, FileText } from 'lucide-react';
 
 export function HistoryPage() {
   const { history, clearHistory, deleteHistory } = useHistory();
   const { loading, fetchAndCheckDraws } = useLotteryAPI();
   const { success, info } = useToast();
-  
+
   const [confirmClear, setConfirmClear] = useState(false);
 
   const handleCheckDraws = async () => {
     const updatedRecords = await fetchAndCheckDraws(history);
-    
+
     if (updatedRecords.some(r => r.drawNumbers && !history.find(h => h.id === r.id)?.drawNumbers)) {
       success('开奖结果已更新');
     } else {
@@ -40,7 +41,7 @@ export function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen pb-20 bg-background-primary">
+    <div className="min-h-screen pb-20">
       <Header
         title="历史记录"
         showBack
@@ -49,7 +50,7 @@ export function HistoryPage() {
           <button
             onClick={handleCheckDraws}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark rounded-lg text-white text-sm font-semibold transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary rounded-xl text-white text-sm font-semibold transition-all duration-300 shadow-lg shadow-primary/25 hover:scale-105"
           >
             {loading ? (
               <>
@@ -58,7 +59,7 @@ export function HistoryPage() {
               </>
             ) : (
               <>
-                <span>🔄</span>
+                <RefreshCw className="w-4 h-4" />
                 <span>检查开奖</span>
               </>
             )}
@@ -69,8 +70,10 @@ export function HistoryPage() {
       <div className="px-4 pt-4 pb-32">
         {history.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">📜</div>
-            <div className="text-text-secondary text-lg">暂无历史记录</div>
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
+              <FileText className="w-10 h-10 text-purple-400" />
+            </div>
+            <div className="text-text-secondary text-lg font-medium">暂无历史记录</div>
             <div className="text-text-muted text-sm mt-2">保存您的选号后，这里会显示历史记录</div>
           </div>
         ) : (
@@ -79,13 +82,14 @@ export function HistoryPage() {
               <span className="text-sm text-text-secondary">共 {history.length} 条记录</span>
               <button
                 onClick={confirmClear ? handleClearAll : () => setConfirmClear(true)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   confirmClear
-                    ? 'bg-status-error hover:bg-red-700 text-white'
-                    : 'bg-gray-700 hover:bg-gray-600 text-text-secondary'
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white shadow-lg shadow-red-500/25'
+                    : 'bg-gray-700/80 hover:bg-gray-600 text-text-secondary'
                 }`}
               >
-                {confirmClear ? '确定清空' : '🗑️ 清空'}
+                <Trash2 className="w-4 h-4" />
+                {confirmClear ? '确定清空' : '清空'}
               </button>
             </div>
 
