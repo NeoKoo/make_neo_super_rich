@@ -12,13 +12,22 @@ export function ShenlongSummon({ trigger, onComplete }: ShenlongSummonProps) {
 
   useEffect(() => {
     if (trigger) {
+      console.log('[ShenlongSummon] Triggered');
       setVisible(true);
       setPhase('entering');
 
-      setTimeout(() => setPhase('full'), 1500);
-      setTimeout(() => setPhase('exiting'), 3500);
+      setTimeout(() => {
+        console.log('[ShenlongSummon] Phase: full');
+        setPhase('full');
+      }, 1500);
 
       setTimeout(() => {
+        console.log('[ShenlongSummon] Phase: exiting');
+        setPhase('exiting');
+      }, 3500);
+
+      setTimeout(() => {
+        console.log('[ShenlongSummon] Complete');
         setVisible(false);
         onComplete?.();
       }, 5000);

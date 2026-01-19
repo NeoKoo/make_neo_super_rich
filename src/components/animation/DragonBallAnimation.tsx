@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 interface FallingDragonBall {
@@ -10,15 +10,20 @@ interface FallingDragonBall {
 }
 
 interface DragonBallAnimationProps {
-  trigger: boolean;
+  trigger: number;
   onComplete?: () => void;
 }
 
 export function DragonBallAnimation({ trigger, onComplete }: DragonBallAnimationProps) {
   const [dragonBalls, setDragonBalls] = useState<FallingDragonBall[]>([]);
+  const prevTriggerRef = useRef(0);
 
   useEffect(() => {
-    if (trigger) {
+    if (trigger > prevTriggerRef.current) {
+      prevTriggerRef.current = trigger;
+
+      console.log('[DragonBallAnimation] Triggered, trigger:', trigger);
+
       const newBalls: FallingDragonBall[] = [{
         id: Date.now(),
         x: 50,

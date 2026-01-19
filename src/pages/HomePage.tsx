@@ -90,6 +90,7 @@ export function HomePage() {
     success('保存成功');
 
     setTimeout(() => {
+      console.log('[HomePage] Triggering celebration animations');
       setShowCoinsAfterExplosion(true);
       setShowShenlongSummon(true);
     }, 1000);
@@ -175,7 +176,7 @@ export function HomePage() {
       />
 
       <DragonBallAnimation
-        trigger={dragonBallTrigger > 0}
+        trigger={dragonBallTrigger}
       />
 
       <CoinAnimation
