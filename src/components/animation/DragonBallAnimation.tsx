@@ -44,14 +44,15 @@ export function DragonBallAnimation({ trigger, onComplete }: DragonBallAnimation
   if (!trigger || dragonBalls.length === 0) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[95] pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-[50] pointer-events-none overflow-hidden">
       {dragonBalls.map(ball => (
         <div
           key={ball.id}
-          className="absolute animate-dragonball-fall"
+          className="absolute animate-dragonball-fall will-change-transform"
           style={{
             left: `${ball.x}%`,
             top: `${ball.y}%`,
+            transform: 'translateZ(0)',
           }}
         >
           <div className={`
