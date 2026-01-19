@@ -4,12 +4,7 @@ import { LotteryConfig } from '../types/lottery';
 export function useNumberSelection(config: LotteryConfig) {
   const [redBalls, setRedBalls] = useState<number[]>([]);
   const [blueBalls, setBlueBalls] = useState<number[]>([]);
-  const [ingotTrigger, setIngotTrigger] = useState(0);
   const [dragonBallTrigger, setDragonBallTrigger] = useState(0);
-
-  const triggerIngotAnimation = useCallback(() => {
-    setIngotTrigger(prev => prev + 1);
-  }, []);
 
   const triggerDragonBallAnimation = useCallback(() => {
     setDragonBallTrigger(prev => prev + 1);
@@ -25,13 +20,12 @@ export function useNumberSelection(config: LotteryConfig) {
         return prev;
       }
 
-      triggerIngotAnimation();
       triggerDragonBallAnimation();
       navigator.vibrate(50);
 
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.redBalls.count, triggerIngotAnimation, triggerDragonBallAnimation]);
+  }, [config.redBalls.count, triggerDragonBallAnimation]);
 
   const toggleBlueBall = useCallback((num: number) => {
     setBlueBalls(prev => {
@@ -43,13 +37,12 @@ export function useNumberSelection(config: LotteryConfig) {
         return prev;
       }
 
-      triggerIngotAnimation();
       triggerDragonBallAnimation();
       navigator.vibrate(50);
 
       return [...prev, num].sort((a, b) => a - b);
     });
-  }, [config.blueBalls.count, triggerIngotAnimation, triggerDragonBallAnimation]);
+  }, [config.blueBalls.count, triggerDragonBallAnimation]);
 
   const clearSelection = useCallback(() => {
     setRedBalls([]);
@@ -77,7 +70,6 @@ export function useNumberSelection(config: LotteryConfig) {
     isComplete,
     redProgress,
     blueProgress,
-    ingotTrigger,
     dragonBallTrigger
   };
 }

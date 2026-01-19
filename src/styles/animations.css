@@ -46,22 +46,6 @@
   }
 }
 
-/* 元宝掉落动画 */
-@keyframes ingot-fall {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(300px) rotate(360deg) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(400px) rotate(720deg) scale(0.8);
-  }
-}
-
 .animate-coin-fall {
   animation: coin-fall 2s ease-in-out forwards;
 }

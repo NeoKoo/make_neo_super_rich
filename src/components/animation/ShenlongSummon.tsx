@@ -73,9 +73,9 @@ export function ShenlongSummon({ trigger, onComplete }: ShenlongSummonProps) {
 
       <div
         className={`
-          absolute left-1/2 bottom-0 -translate-x-1/2
+          absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
           transform transition-all duration-1000 ease-out
-          ${phase === 'entering' ? 'translate-y-full' : 'translate-y-0'}
+          ${phase === 'entering' ? 'translate-y-[50vh] opacity-0' : 'translate-y-0 opacity-100'}
           ${phase === 'exiting' ? 'opacity-0 scale-110' : ''}
         `}
       >
@@ -135,9 +135,9 @@ export function ShenlongSummon({ trigger, onComplete }: ShenlongSummonProps) {
 
         {phase !== 'exiting' && (
           <>
-            <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-4 h-40 bg-gradient-to-t from-yellow-500/60 via-yellow-300/40 to-transparent animate-light-beam" />
-            <div className="absolute -bottom-20 left-1/2 -translate-x-8 w-2 h-32 bg-gradient-to-t from-amber-500/50 via-amber-300/30 to-transparent animate-light-beam-delayed" />
-            <div className="absolute -bottom-20 left-1/2 translate-x-4 w-2 h-36 bg-gradient-to-t from-orange-500/50 via-orange-300/30 to-transparent animate-light-beam-alt" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 mt-32 w-4 h-64 bg-gradient-to-t from-yellow-500/60 via-yellow-300/40 to-transparent animate-light-beam" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-8 mt-32 w-2 h-56 bg-gradient-to-t from-amber-500/50 via-amber-300/30 to-transparent animate-light-beam-delayed" />
+            <div className="absolute top-1/2 left-1/2 translate-x-4 mt-32 w-2 h-60 bg-gradient-to-t from-orange-500/50 via-orange-300/30 to-transparent animate-light-beam-alt" />
           </>
         )}
       </div>

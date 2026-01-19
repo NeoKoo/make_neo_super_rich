@@ -83,9 +83,11 @@ export async function getAIRecommendation(
     }
 
     const aiContent = data.choices[0].message.content.trim();
-    
-    // 解析AI返回的内容
-    return parseAIResponse(aiContent);
+
+    console.log('[AI Response]', aiContent);
+    console.log('[AI Response parsed]', parseAIResponse(aiContent, lotteryType));
+
+    return parseAIResponse(aiContent, lotteryType);
   } catch (error) {
     console.error('AI recommendation error:', error);
     return null;
@@ -95,34 +97,35 @@ export async function getAIRecommendation(
 /**
  * 解析AI返回的号码推荐
  */
-function parseAIResponse(text: string): LotteryRecommendation | null {
+function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SHUANGSEQIU): LotteryRecommendation | null {
   try {
-    // 提取号码部分
     const match = text.match(/今晚的开奖号码为：(.+)/);
     if (!match) {
       return null;
     }
 
     const numbersText = match[1].trim();
-    
-    // 分离红球和蓝球
+
     const [redBallsText, blueBallsText] = numbersText.split(' - ');
-    
+
     if (!redBallsText || !blueBallsText) {
       return null;
     }
+
+    const redBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 33 : 35;
+    const blueBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 16 : 12;
 
     // 解析红球
     const redBalls = redBallsText
       .split(/\s+/)
       .map(n => parseInt(n.trim()))
-      .filter(n => !isNaN(n) && n >= 1 && n <= 33);
+      .filter(n => !isNaN(n) && n >= 1 && n <= redBallMax);
 
     // 解析蓝球
     const blueBalls = blueBallsText
       .split(/\s+/)
       .map(n => parseInt(n.trim()))
-      .filter(n => !isNaN(n) && n >= 1 && n <= 16);
+      .filter(n => !isNaN(n) && n >= 1 && n <= blueBallMax);
 
     if (redBalls.length === 0 || blueBalls.length === 0) {
       return null;

@@ -16,7 +16,6 @@ import { RandomStrategyModal } from '../components/lottery/RandomStrategyModal';
 import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
-import { IngotFall } from '../components/animation/IngotFall';
 import { DragonBallAnimation } from '../components/animation/DragonBallAnimation';
 import { ShenlongSummon } from '../components/animation/ShenlongSummon';
 import { APP_CONFIG } from '../config/app';
@@ -24,7 +23,7 @@ import { APP_CONFIG } from '../config/app';
 export function HomePage() {
   const navigate = useNavigate();
   const { lotteryType, config } = useLotteryConfig();
-  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, ingotTrigger, dragonBallTrigger } = useNumberSelection(config);
+  const { redBalls, blueBalls, toggleRedBall, toggleBlueBall, clearSelection, setNumbers, isComplete, dragonBallTrigger } = useNumberSelection(config);
   const { luckyColor } = useLuckyColor();
   const { addHistory } = useHistory();
   const { generateNumbers } = useRandomNumbers();
@@ -102,6 +101,38 @@ export function HomePage() {
     success('AI财神推荐成功');
   };
 
+  const handleSaveAIRecommendation = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]);
+    }
+
+    const today = getLocalDateFromBeijing();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const lotteryId = `${year}${month}${day}`;
+
+    addHistory({
+      lotteryType: lotteryType,
+      lotteryId,
+      numbers: { redBalls, blueBalls },
+      timestamp: Date.now(),
+      strategyType: 'ai_god',
+    });
+
+    success('保存成功');
+
+    setTimeout(() => {
+      console.log('[HomePage] Triggering celebration animations');
+      setShowCoinsAfterExplosion(true);
+      setShowShenlongSummon(true);
+    }, 1000);
+
+    setTimeout(() => {
+      navigate('/history');
+    }, 5500);
+  };
+
   const handleCelebrationComplete = () => {
     setShowCoinsAfterExplosion(false);
   };
@@ -122,6 +153,7 @@ export function HomePage() {
           zodiacSign={zodiacSign}
           birthDate={settings.birthDate}
           onSelectNumbers={handleAIRecommend}
+          onSaveAIRecommendation={handleSaveAIRecommendation}
         />
         
         <NumberGrid
@@ -160,10 +192,6 @@ export function HomePage() {
         isOpen={showStrategyModal}
         onClose={() => setShowStrategyModal(false)}
         onSelectStrategy={handleRandom}
-      />
-
-      <IngotFall
-        trigger={ingotTrigger > 0}
       />
 
       <DragonBallAnimation

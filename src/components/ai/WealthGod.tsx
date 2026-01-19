@@ -7,9 +7,10 @@ interface WealthGodProps {
   zodiacSign: string;
   birthDate: string;
   onSelectNumbers?: (redBalls: number[], blueBalls: number[]) => void;
+  onSaveAIRecommendation?: () => void;
 }
 
-export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers }: WealthGodProps) {
+export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers, onSaveAIRecommendation }: WealthGodProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<string | null>(null);
@@ -22,10 +23,10 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers 
 
     try {
       const result = await getAIRecommendation(lotteryType, zodiacSign, birthDate);
-      
+
       if (result) {
         setRecommendation(result.text);
-        
+
         if (onSelectNumbers) {
           onSelectNumbers(result.redBalls, result.blueBalls);
         }
@@ -131,7 +132,6 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers 
                 </div>
               </div>
 
-              {/* 推荐结果 */}
               {recommendation && !loading && (
                 <div className="bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl p-6 border-2 border-yellow-300 dark:border-yellow-700 shadow-lg">
                   <div className="text-center">
@@ -144,6 +144,17 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers 
                         {recommendation}
                       </p>
                     </div>
+                    {onSaveAIRecommendation && (
+                      <button
+                        onClick={onSaveAIRecommendation}
+                        className="mt-4 w-full py-3 px-6 rounded-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="text-xl">💰</span>
+                          <span>保存并召唤神龙</span>
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
