@@ -36,7 +36,6 @@ export function HomePage() {
   
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [zodiacSign, setZodiacSign] = useState('');
-  const [isExploding, setIsExploding] = useState(false);
   const [showCoinsAfterExplosion, setShowCoinsAfterExplosion] = useState(false);
   const [showShenlongSummon, setShowShenlongSummon] = useState(false);
   
@@ -71,8 +70,6 @@ export function HomePage() {
       navigator.vibrate([100, 50, 100]);
     }
 
-    setIsExploding(true);
-
     const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -103,10 +100,6 @@ export function HomePage() {
   const handleAIRecommend = (redBalls: number[], blueBalls: number[]) => {
     setNumbers(redBalls, blueBalls);
     success('AI财神推荐成功');
-  };
-
-  const handleExplosionEnd = () => {
-    setIsExploding(false);
   };
 
   const handleCelebrationComplete = () => {
@@ -161,8 +154,6 @@ export function HomePage() {
         isComplete={isComplete}
         onSave={handleSave}
         onRandom={() => setShowStrategyModal(true)}
-        isExploding={isExploding}
-        onExplosionEnd={handleExplosionEnd}
       />
 
       <RandomStrategyModal

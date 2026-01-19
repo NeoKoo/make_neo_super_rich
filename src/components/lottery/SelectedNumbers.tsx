@@ -1,6 +1,5 @@
 import { CopyButton } from '../common/CopyButton';
 import { NumberBall } from './NumberBall';
-import { TreasureBowl } from '../animation/TreasureBowl';
 import { Trash2, Save, Dices } from 'lucide-react';
 
 interface SelectedNumbersProps {
@@ -11,8 +10,6 @@ interface SelectedNumbersProps {
   isComplete: boolean;
   onSave: () => void;
   onRandom: () => void;
-  isExploding?: boolean;
-  onExplosionEnd?: () => void;
 }
 
 export function SelectedNumbers({
@@ -22,31 +19,17 @@ export function SelectedNumbers({
   lotteryType,
   isComplete,
   onSave,
-  onRandom,
-  isExploding = false,
-  onExplosionEnd
+  onRandom
 }: SelectedNumbersProps) {
   const redLabel = lotteryType === '双色球' ? '红球' : '前区';
   const blueLabel = lotteryType === '双色球' ? '蓝球' : '后区';
-  const isFull = isComplete;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 pb-safe">
       {/* 玻璃背景 */}
       <div className="absolute inset-0 bg-gradient-to-t from-background-secondary/95 to-background-secondary/80 backdrop-blur-xl border-t border-white/10" />
 
-      {/* 聚宝盆 */}
-      {!isExploding && (
-        <div className="absolute -top-28 left-1/2 -translate-x-1/2 z-10">
-          <TreasureBowl
-            isFull={isFull}
-            isExploding={isExploding}
-            onExplosionEnd={onExplosionEnd}
-          />
-        </div>
-      )}
-
-      <div className="px-4 py-2 sm:py-3 pt-28 relative">
+      <div className="px-4 py-2 sm:py-3 pt-4 relative">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             {redBalls.length > 0 && (
