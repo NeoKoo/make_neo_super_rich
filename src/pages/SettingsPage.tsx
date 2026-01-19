@@ -18,17 +18,24 @@ export function SettingsPage() {
     APP_CONFIG.defaultSettings
   );
 
+  const [name, setName] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
-  const [notifications] = useState(settings.notifications);
 
+  const [notifications] = useState(settings.notifications);
   useEffect(() => {
+    setName(settings.name || '');
     const [month, day] = settings.birthDate.split('-');
     setBirthMonth(month);
     setBirthDay(day);
-  }, [settings.birthDate]);
+  }, [settings.name, settings.birthDate]);
 
   const handleSaveSettings = () => {
+    if (!name.trim()) {
+      error('请输入姓名');
+      return;
+    }
+
     const birthDate = `${birthMonth}-${birthDay}`;
     const month = parseInt(birthMonth);
     const day = parseInt(birthDay);
@@ -45,6 +52,7 @@ export function SettingsPage() {
 
     const newSettings: UserSettings = {
       ...settings,
+      name: name.trim(),
       birthDate,
       zodiacSign,
       luckyColor: {
@@ -83,7 +91,6 @@ export function SettingsPage() {
       />
 
       <div className="px-4 pt-4 pb-36 sm:pb-32 space-y-6">
-        {/* 个人信息 */}
         <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/20 rounded-xl">
@@ -93,6 +100,17 @@ export function SettingsPage() {
           </div>
 
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-2">姓名</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="请输入您的姓名"
+                className="w-full px-4 py-3 bg-background-tertiary/50 rounded-xl text-text-primary border border-white/10 focus:border-primary focus:outline-none transition-colors"
+              />
+            </div>
+
             <div>
               <label className="block text-sm text-text-secondary mb-2">出生日期</label>
               <div className="flex gap-3">
@@ -136,7 +154,6 @@ export function SettingsPage() {
           </div>
         </div>
 
-        {/* 幸运色主题 */}
         <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-amber-500/20 rounded-xl">
@@ -177,7 +194,6 @@ export function SettingsPage() {
           </div>
         </div>
 
-        {/* 数据管理 */}
         <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-blue-500/20 rounded-xl">
@@ -210,7 +226,6 @@ export function SettingsPage() {
           </div>
         </div>
 
-        {/* 关于 */}
         <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-green-500/20 rounded-xl">

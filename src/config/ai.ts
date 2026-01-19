@@ -1,9 +1,9 @@
 export const AI_CONFIG = {
   zhipuKey: import.meta.env.VITE_ZHIPU_API_KEY || '',
   baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-  model: 'GLM-4-Flash',
+  model: 'glm-4.7',
   timeout: 30000,
-  defaultPrompt: `你是一个专业的彩票推荐助手。请根据用户的星座和今天的日期，推荐一组幸运号码。
+  defaultPrompt: `你是一个专业的彩票推荐助手。请根据用户的姓名、星座和今天的日期，推荐一组幸运号码。
 
  要求：
 1. 双色球：6个红球（1-33，不重复）+ 1个蓝球（1-16）

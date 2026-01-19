@@ -3,6 +3,7 @@ export const APP_CONFIG = {
   shortName: '选号助手',
   version: '1.0.0',
   defaultSettings: {
+    name: "高创杰",
     birthDate: '12-10',
     zodiacSign: '射手座',
     luckyColor: {

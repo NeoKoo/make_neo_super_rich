@@ -31,7 +31,7 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
       const [month, day] = birthDate.split('-').map(Number);
       const sign = getZodiacSign(month, day);
       setZodiacSign(sign);
-    } else {
+            <div className="text-xs text-purple-300/80">{settings.name || '高创杰'}专属好运指南</div>
       setZodiacSign('射手座');
     }
   }, [settings.birthDate]);

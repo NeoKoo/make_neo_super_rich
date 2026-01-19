@@ -1,6 +1,6 @@
 import { AI_CONFIG } from '../config/ai';
 import { LotteryType } from '../types/lottery';
-import { getLocalDateFromBeijing } from '../utils/dateUtils';
+import { getLocalDateFromBeijing } from './dateUtils';
 
 interface ZhipuMessage {
   role: 'system' | 'user' | 'assistant';
@@ -11,6 +11,7 @@ interface ZhipuApiResponse {
   choices: Array<{
     message: {
       content: string;
+      reasoning_content?: string;
     };
   }>;
 }
@@ -19,15 +20,14 @@ interface LotteryRecommendation {
   redBalls: number[];
   blueBalls: number[];
   text: string;
+  reasoning?: string;
 }
 
-/**
- * 调用智谱AI API获取彩票推荐
- */
 export async function getAIRecommendation(
   lotteryType: LotteryType,
   zodiacSign: string,
-  birthDate: string
+  birthDate: string,
+  userName: string
 ): Promise<LotteryRecommendation | null> {
   try {
     const today = getLocalDateFromBeijing();
@@ -39,12 +39,12 @@ export async function getAIRecommendation(
     });
 
     const prompt = AI_CONFIG.defaultPrompt +
-      `\n\n彩票类型：${lotteryType}\n用户的星座：${zodiacSign}\n用户的生日：${birthDate}\n今天的日期：${dateStr}`;
+      `\n\n彩票类型：${lotteryType}\n用户的姓名：${userName}\n用户的星座：${zodiacSign}\n用户的生日：${birthDate}\n今天的日期：${dateStr}`;
 
     const messages: ZhipuMessage[] = [
       {
         role: 'system',
-        content: '你是一个专业的彩票推荐助手，基于用户的星座和生日推荐幸运号码。'
+        content: '你是一个专业的彩票推荐助手，基于用户的姓名、星座和生日推荐幸运号码。'
       },
       {
         role: 'user',
@@ -64,7 +64,10 @@ export async function getAIRecommendation(
       body: JSON.stringify({
         model: AI_CONFIG.model,
         messages: messages,
-        temperature: 0.7, // 温度参数，控制随机性
+        thinking: {
+          type: 'enabled'
+        },
+        temperature: 0.7,
         max_tokens: 200
       }),
       signal: controller.signal
@@ -83,21 +86,20 @@ export async function getAIRecommendation(
     }
 
     const aiContent = data.choices[0].message.content.trim();
+    const reasoningContent = data.choices[0].message.reasoning_content;
 
     console.log('[AI Response]', aiContent);
+    console.log('[AI Reasoning]', reasoningContent);
     console.log('[AI Response parsed]', parseAIResponse(aiContent, lotteryType));
 
-    return parseAIResponse(aiContent, lotteryType);
+    return parseAIResponse(aiContent, lotteryType, reasoningContent);
   } catch (error) {
     console.error('AI recommendation error:', error);
     return null;
   }
 }
 
-/**
- * 解析AI返回的号码推荐
- */
-function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SHUANGSEQIU): LotteryRecommendation | null {
+function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SHUANGSEQIU, reasoning?: string): LotteryRecommendation | null {
   try {
     const match = text.match(/今晚的开奖号码为：(.+)/);
     if (!match) {
@@ -115,13 +117,11 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
     const redBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 33 : 35;
     const blueBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 16 : 12;
 
-    // 解析红球
     const redBalls = redBallsText
       .split(/\s+/)
       .map(n => parseInt(n.trim()))
       .filter(n => !isNaN(n) && n >= 1 && n <= redBallMax);
 
-    // 解析蓝球
     const blueBalls = blueBallsText
       .split(/\s+/)
       .map(n => parseInt(n.trim()))
@@ -134,7 +134,8 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
     return {
       redBalls,
       blueBalls,
-      text
+      text,
+      reasoning
     };
   } catch (error) {
     console.error('Parse AI response error:', error);

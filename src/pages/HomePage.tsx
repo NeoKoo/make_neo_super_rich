@@ -152,6 +152,7 @@ export function HomePage() {
           lotteryType={lotteryType}
           zodiacSign={zodiacSign}
           birthDate={settings.birthDate}
+          userName={settings.name || '高创杰'}
           onSelectNumbers={handleAIRecommend}
           onSaveAIRecommendation={handleSaveAIRecommendation}
         />

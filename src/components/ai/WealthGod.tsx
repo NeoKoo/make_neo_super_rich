@@ -6,26 +6,30 @@ interface WealthGodProps {
   lotteryType: LotteryType;
   zodiacSign: string;
   birthDate: string;
+  userName: string;
   onSelectNumbers?: (redBalls: number[], blueBalls: number[]) => void;
   onSaveAIRecommendation?: () => void;
 }
 
-export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers, onSaveAIRecommendation }: WealthGodProps) {
+export function WealthGod({ lotteryType, zodiacSign, birthDate, userName, onSelectNumbers, onSaveAIRecommendation }: WealthGodProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<string | null>(null);
+  const [reasoning, setReasoning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleRequest = async () => {
     setLoading(true);
     setError(null);
     setRecommendation(null);
+    setReasoning(null);
 
     try {
-      const result = await getAIRecommendation(lotteryType, zodiacSign, birthDate);
+      const result = await getAIRecommendation(lotteryType, zodiacSign, birthDate, userName);
 
       if (result) {
         setRecommendation(result.text);
+        setReasoning(result.reasoning || null);
 
         if (onSelectNumbers) {
           onSelectNumbers(result.redBalls, result.blueBalls);
@@ -43,6 +47,7 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
   const handleClose = () => {
     setIsOpen(false);
     setRecommendation(null);
+    setReasoning(null);
     setError(null);
   };
 
@@ -66,8 +71,7 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
-            {/* 头部 */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-4">
@@ -88,9 +92,7 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
               </div>
             </div>
 
-            {/* 内容区 */}
             <div className="p-6 space-y-4">
-              {/* 信息卡片 */}
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -107,6 +109,14 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
                     </div>
                     <div className="text-sm font-semibold text-gray-900 dark:text-white">
                       {zodiacSign}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-purple-600 dark:text-purple-400 mb-1">
+                      👤 用户姓名
+                    </div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {userName}
                     </div>
                   </div>
                   <div>
@@ -131,6 +141,22 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
                   </div>
                 </div>
               </div>
+
+              {reasoning && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border-2 border-blue-300 dark:border-blue-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">🧠</span>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      AI思考过程
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-900 rounded-lg py-3 px-4 shadow-inner max-h-60 overflow-y-auto">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                      {reasoning}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {recommendation && !loading && (
                 <div className="bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl p-6 border-2 border-yellow-300 dark:border-yellow-700 shadow-lg">
@@ -159,7 +185,6 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
                 </div>
               )}
 
-              {/* 错误提示 */}
               {error && (
                 <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
                   <div className="flex items-center gap-2">
@@ -171,7 +196,6 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
                 </div>
               )}
 
-              {/* 操作按钮 */}
               <div className="space-y-3">
                 <button
                   onClick={handleRequest}
@@ -194,7 +218,7 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
                     </span>
                   )}
                 </button>
-                
+
                 <button
                   onClick={handleClose}
                   disabled={loading}
@@ -204,13 +228,12 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, onSelectNumbers,
                 </button>
               </div>
 
-              {/* 提示信息 */}
               <div className="text-center">
                 <p className="text-xs text-gray-400 dark:text-gray-500">
-                  💡 财神AI基于你的星座和生日推荐，仅供娱乐参考
+                  💡 财神AI基于你的姓名、星座和生日推荐，仅供娱乐参考
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  使用智谱AI GLM-4-Flash模型
+                  使用智谱AI GLM-4.7模型（深度思考模式）
                 </p>
               </div>
             </div>

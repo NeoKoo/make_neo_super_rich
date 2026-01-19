@@ -1,4 +1,5 @@
 export interface UserSettings {
+  name: string;
   birthDate: string;
   zodiacSign: string;
   luckyColor: {
