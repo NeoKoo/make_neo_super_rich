@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getDailyFortune, isLuckyTime } from '../../utils/fortuneService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { APP_CONFIG } from '../../config/app';
@@ -24,33 +24,18 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
   const [error, setError] = useState<string | null>(null);
   const [zodiacSign, setZodiacSign] = useState('');
 
-  // 计算星座
   useEffect(() => {
     const birthDate = settings.birthDate;
     if (birthDate) {
       const [month, day] = birthDate.split('-').map(Number);
       const sign = getZodiacSign(month, day);
       setZodiacSign(sign);
-            <div className="text-xs text-purple-300/80">{settings.name || '高创杰'}专属好运指南</div>
+    } else {
       setZodiacSign('射手座');
     }
   }, [settings.birthDate]);
 
-  // 获取每日运势
-  useEffect(() => {
-    fetchDailyFortune();
-  }, [lotteryType, zodiacSign]);
-
-  // 定时检查幸运时间状态
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // 每分钟检查一次幸运时间状态
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [fortune?.luckyTime]);
-
-  const fetchDailyFortune = async () => {
+  const fetchDailyFortune = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -61,26 +46,41 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         settings.birthDate
       );
 
-      if (result) {
-        setFortune(result);
+      if (result.success && result.data) {
+        setFortune(result.data);
+      } else if (result.error) {
+        console.error('[DailyFortune Error]', result.error);
+        setError(result.error.userFriendlyMessage);
       } else {
+        console.error('[DailyFortune Error] Unknown error - no data and no error');
         setError('暂时无法获取运势');
       }
     } catch (err) {
+      console.error('[DailyFortune Exception]', err);
       setError('获取运势失败');
     } finally {
       setLoading(false);
     }
-  };
+  }, [zodiacSign, lotteryType, settings.birthDate]);
+
+  useEffect(() => {
+    fetchDailyFortune()
+  }, [fetchDailyFortune])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+    }, 60000)
+
+    return () => clearInterval(interval)
+  }, [fortune?.luckyTime])
 
   const handleRefresh = () => {
-    fetchDailyFortune();
+    fetchDailyFortune()
   };
 
   if (loading) {
     return (
       <div className="relative overflow-hidden bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-fuchsia-500/20 rounded-2xl p-5 mb-4 border border-purple-400/20">
-        {/* 动画背景 */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent animate-[shimmer_2s_infinite]" />
         <div className="flex items-center justify-center gap-3 relative z-10">
           <Sparkles className="w-5 h-5 text-purple-400 animate-spin" />
@@ -119,11 +119,9 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-violet-500/20 via-purple-500/15 to-fuchsia-500/20 rounded-2xl p-5 mb-4 border border-purple-400/30 shadow-xl shadow-purple-500/10">
-      {/* 装饰性光晕 */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-fuchsia-500/20 rounded-full blur-3xl" />
 
-      {/* 头部 */}
       <div className="flex items-center justify-between mb-4 relative z-10">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-gradient-to-br from-purple-500/30 to-fuchsia-500/30 rounded-xl border border-purple-400/30">
@@ -143,7 +141,6 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         </button>
       </div>
 
-      {/* 祝福语 */}
       <div className="mb-4 relative z-10">
         <div className="flex items-start gap-2.5">
           <Star className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -153,7 +150,6 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         </div>
       </div>
 
-      {/* 幸运时间 */}
       <div className={`
         relative overflow-hidden rounded-xl p-4 mb-4
         ${isNowLucky
@@ -189,7 +185,6 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         </div>
       </div>
 
-      {/* 幸运原因 */}
       <div className="flex items-start gap-2.5 text-sm text-purple-200/80 relative z-10">
         <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p>{fortune.reason}</p>
@@ -198,7 +193,6 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
   );
 }
 
-// 辅助函数：计算星座
 function getZodiacSign(month: number, day: number): string {
   const zodiacDates = [
     { name: '摩羯座', endMonth: 1, endDay: 19 },

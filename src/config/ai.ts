@@ -1,7 +1,7 @@
 export const AI_CONFIG = {
-  zhipuKey: import.meta.env.VITE_ZHIPU_API_KEY || '',
-  baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-  model: 'glm-4.7',
+  apiKey: import.meta.env.VITE_QWEN_API_KEY || '',
+  baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  model: 'qwen-plus',
   timeout: 30000,
   defaultPrompt: `你是一个专业的彩票推荐助手。请根据用户的姓名、星座和今天的日期，推荐一组幸运号码。
 

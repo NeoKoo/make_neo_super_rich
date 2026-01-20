@@ -15,29 +15,31 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, userName, onSele
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<string | null>(null);
-  const [reasoning, setReasoning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleRequest = async () => {
     setLoading(true);
     setError(null);
     setRecommendation(null);
-    setReasoning(null);
 
     try {
       const result = await getAIRecommendation(lotteryType, zodiacSign, birthDate, userName);
 
-      if (result) {
-        setRecommendation(result.text);
-        setReasoning(result.reasoning || null);
+      if (result.success && result.data) {
+        setRecommendation(result.data.text);
 
         if (onSelectNumbers) {
-          onSelectNumbers(result.redBalls, result.blueBalls);
+          onSelectNumbers(result.data.redBalls, result.data.blueBalls);
         }
+      } else if (result.error) {
+        console.error('[WealthGod Error]', result.error);
+        setError(result.error.userFriendlyMessage);
       } else {
+        console.error('[WealthGod Error] Unknown error - no data and no error');
         setError('AI暂时无法生成推荐，请稍后再试');
       }
     } catch (err) {
+      console.error('[WealthGod Exception]', err);
       setError('生成推荐失败，请检查网络连接');
     } finally {
       setLoading(false);
@@ -47,7 +49,6 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, userName, onSele
   const handleClose = () => {
     setIsOpen(false);
     setRecommendation(null);
-    setReasoning(null);
     setError(null);
   };
 
@@ -142,22 +143,6 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, userName, onSele
                 </div>
               </div>
 
-              {reasoning && (
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border-2 border-blue-300 dark:border-blue-700">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl">🧠</span>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      AI思考过程
-                    </p>
-                  </div>
-                  <div className="bg-white dark:bg-gray-900 rounded-lg py-3 px-4 shadow-inner max-h-60 overflow-y-auto">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                      {reasoning}
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {recommendation && !loading && (
                 <div className="bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl p-6 border-2 border-yellow-300 dark:border-yellow-700 shadow-lg">
                   <div className="text-center">
@@ -232,10 +217,10 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, userName, onSele
                 <p className="text-xs text-gray-400 dark:text-gray-500">
                   💡 财神AI基于你的姓名、星座和生日推荐，仅供娱乐参考
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  使用智谱AI GLM-4.7模型（深度思考模式）
-                </p>
-              </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    💡 财神AI基于你的姓名、星座和生日推荐，仅供娱乐参考
+                  </p>
+                </div>
             </div>
           </div>
         </div>
