@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toast } from './components/common/Toast';
+import { TabBar } from './components/layout/TabBar';
 import { useToast } from './hooks/useToast';
 import { HomePage } from './pages/HomePage';
 import { HistoryPage } from './pages/HistoryPage';
@@ -12,6 +13,8 @@ function App() {
     <BrowserRouter>
       {/* 极光背景层 */}
       <div className="aurora-bg" />
+
+      <TabBar />
 
       <div className="min-h-screen bg-transparent text-text-primary relative">
         <Routes>

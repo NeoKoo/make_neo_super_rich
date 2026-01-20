@@ -11,8 +11,8 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { RandomStrategy } from '../constants/randomStrategies';
 import { LotteryTypeBadge } from '../components/lottery/LotteryTypeBadge';
 import { NumberGrid } from '../components/lottery/NumberGrid';
-import { SelectedNumbers } from '../components/lottery/SelectedNumbers';
 import { RandomStrategyModal } from '../components/lottery/RandomStrategyModal';
+import { ActionButtons } from '../components/lottery/ActionButtons';
 import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
@@ -48,7 +48,7 @@ export function HomePage() {
       setZodiacSign('未知');
     }
   }, [settings.birthDate]);
-
+ 
   const handleRandom = (strategy: RandomStrategy) => {
     try {
       const numbers = generateNumbers(strategy, config);
@@ -58,23 +58,23 @@ export function HomePage() {
       error('随机选号失败');
     }
   };
-
+ 
   const handleSave = () => {
     if (!isComplete) {
       error('请先完成选号');
       return;
     }
-
+ 
     if ('vibrate' in navigator) {
       navigator.vibrate([100, 50, 100]);
     }
-
+ 
     const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const lotteryId = `${year}${month}${day}`;
-
+ 
     addHistory({
       lotteryType: lotteryType,
       lotteryId,
@@ -82,36 +82,36 @@ export function HomePage() {
       timestamp: Date.now(),
       strategyType: 'ai_god',
     });
-
+ 
     success('保存成功');
-
+ 
     setTimeout(() => {
       console.log('[HomePage] Triggering celebration animations');
       setShowCoinsAfterExplosion(true);
       setShowShenlongSummon(true);
     }, 1000);
-
+ 
     setTimeout(() => {
       navigate('/history');
     }, 5500);
   };
-
+ 
   const handleAIRecommend = (redBalls: number[], blueBalls: number[]) => {
     setNumbers(redBalls, blueBalls);
     success('AI财神推荐成功');
   };
-
+ 
   const handleSaveAIRecommendation = () => {
     if ('vibrate' in navigator) {
       navigator.vibrate([100, 50, 100]);
     }
-
+ 
     const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const lotteryId = `${year}${month}${day}`;
-
+ 
     addHistory({
       lotteryType: lotteryType,
       lotteryId,
@@ -119,31 +119,31 @@ export function HomePage() {
       timestamp: Date.now(),
       strategyType: 'ai_god',
     });
-
+ 
     success('保存成功');
-
+ 
     setTimeout(() => {
       console.log('[HomePage] Triggering celebration animations');
       setShowCoinsAfterExplosion(true);
       setShowShenlongSummon(true);
     }, 1000);
-
+ 
     setTimeout(() => {
       navigate('/history');
     }, 5500);
   };
-
+ 
   const handleCelebrationComplete = () => {
     setShowCoinsAfterExplosion(false);
   };
-
+ 
   const handleShenlongComplete = () => {
     setShowShenlongSummon(false);
   };
-
+ 
   return (
-    <div className="min-h-screen bg-background-primary pb-safe" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
-      <div className="px-4 pt-4 pb-48 sm:pb-40">
+    <div className="min-h-screen bg-background-primary pb-40" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
+      <div className="px-4 pt-4 pb-48">
         <LotteryTypeBadge type={lotteryType} />
         
         <DailyFortune lotteryType={lotteryType} />
@@ -179,20 +179,20 @@ export function HomePage() {
         />
       </div>
 
-      <SelectedNumbers
-        redBalls={redBalls}
-        blueBalls={blueBalls}
-        onClear={clearSelection}
-        lotteryType={lotteryType}
-        isComplete={isComplete}
-        onSave={handleSave}
-        onRandom={() => setShowStrategyModal(true)}
-      />
-
       <RandomStrategyModal
         isOpen={showStrategyModal}
         onClose={() => setShowStrategyModal(false)}
         onSelectStrategy={handleRandom}
+      />
+
+      <ActionButtons
+        redBalls={redBalls}
+        blueBalls={blueBalls}
+        onClear={clearSelection}
+        onRandom={() => setShowStrategyModal(true)}
+        onSave={handleSave}
+        isComplete={isComplete}
+        lotteryType={lotteryType}
       />
 
       <DragonBallAnimation
@@ -229,7 +229,7 @@ function getZodiacSign(month: number, day: number): string {
     { name: '射手座', endMonth: 12, endDay: 21 },
     { name: '摩羯座', endMonth: 12, endDay: 31 }
   ];
-
+ 
   for (const zodiac of zodiacDates) {
     if (month === zodiac.endMonth && day <= zodiac.endDay) {
       return zodiac.name;
