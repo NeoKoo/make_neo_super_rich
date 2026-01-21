@@ -363,7 +363,7 @@ class SoundManager {
   /**
    * 停止音效（Web Audio API 不支持停止特定音效，此方法保留用于兼容性）
    */
-  stopSound(soundName: SoundEffects): void {
+  stopSound(_soundName: SoundEffects): void {
     // Web Audio API 生成的音效无法单独停止
     // 保留此方法以保持 API 兼容性
   }

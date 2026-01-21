@@ -19,10 +19,6 @@ function convertDateToIssue(dateStr: string, lotteryType: LotteryType): string {
   const day = parseInt(dateStr.substring(6, 8));
 
   const date = new Date(year, month - 1, day);
-  const startOfYear = new Date(year, 0, 1);
-
-  // 计算从年初开始的天数
-  const dayOfYear = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
 
   // 根据彩票类型计算期号
   let issueNumber: number;
