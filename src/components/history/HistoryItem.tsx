@@ -91,7 +91,7 @@ export function HistoryItem({ record, onDelete }: HistoryItemProps) {
               revealed={revealed}
               onReveal={handleReveal}
             >
-              <div className="p-3 bg-yellow-500/10 rounded-lg border-l-4 border-yellow-500">
+              <div className="min-h-[200px] p-3 bg-yellow-500/10 rounded-lg border-l-4 border-yellow-500">
                 <div className="text-sm text-yellow-500 font-semibold mb-2">🎯 开奖号码：</div>
 
                 <div className="mb-2 flex items-center flex-wrap gap-1">

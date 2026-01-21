@@ -1,6 +1,7 @@
 import { CopyButton } from '../common/CopyButton';
 import { Trash2, Save, Dices } from 'lucide-react';
 import { NumberBall } from './NumberBall';
+import { soundManager } from '../../utils/soundManager';
 
 interface ActionButtonsProps {
   redBalls: number[];
@@ -69,7 +70,10 @@ export function ActionButtons({
 
             <div className="flex gap-1.5 flex-shrink-0">
               <button
-                onClick={onClear}
+                onClick={() => {
+                  soundManager.playNumberClear();
+                  onClear();
+                }}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-700/80 hover:bg-gray-600 text-white text-xs font-medium transition-all duration-300 hover:scale-105"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -77,7 +81,10 @@ export function ActionButtons({
               </button>
 
               <button
-                onClick={onRandom}
+                onClick={() => {
+                  soundManager.playStrategySelect();
+                  onRandom();
+                }}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white text-xs font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/25"
               >
                 <Dices className="w-3.5 h-3.5" />
@@ -85,7 +92,12 @@ export function ActionButtons({
               </button>
 
               <button
-                onClick={onSave}
+                onClick={() => {
+                  if (isComplete) {
+                    soundManager.playSaveSuccess();
+                    onSave();
+                  }
+                }}
                 disabled={!isComplete}
                 className={`
                   flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-300

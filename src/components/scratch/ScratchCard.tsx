@@ -28,8 +28,12 @@ export function ScratchCard({ children, onReveal, revealed = false, coverText = 
 
     // 设置canvas尺寸
     const rect = container.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    const width = Math.max(rect.width, 300); // 最小宽度300px
+    const height = Math.max(rect.height, 200); // 最小高度200px
+    canvas.width = width;
+    canvas.height = height;
+    
+    console.log('Canvas尺寸:', width, 'x', height, '容器尺寸:', rect.width, 'x', rect.height);
 
     // 绘制覆盖层
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);

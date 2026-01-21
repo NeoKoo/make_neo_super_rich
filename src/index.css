@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Rich Premium Palette */
+  /* Rich Premium Palette - 会被主题系统动态覆盖 */
   --primary-color: #7C3AED;
   --primary-light: #A78BFA;
   --primary-dark: #5B21B6;
@@ -18,18 +18,21 @@
   --text-secondary: #CBD5E1;
   --text-muted: #64748B;
 
+  --accent-color: #F59E0B;
+
+  /* 主题渐变 - 会被主题系统动态覆盖 */
+  --primary-gradient: linear-gradient(135deg, #7C3AED, #A78BFA);
+  --background-gradient: linear-gradient(180deg, #0F0F23, #1E1B4B);
+  --card-gradient: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(167, 139, 250, 0.1));
+
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(255, 255, 255, 0.05);
 }
 
 @layer base {
   body {
-    @apply bg-slate-950 text-text-primary antialiased;
-    background-image:
-      radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 0% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 100% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(244, 63, 94, 0.08) 0%, transparent 40%);
+    @apply text-text-primary antialiased;
+    background-image: var(--background-gradient);
     background-attachment: fixed;
   }
 
@@ -69,7 +72,7 @@
   }
 
   .shadow-glow {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 0 20px var(--primary-color, rgba(124, 58, 237, 0.3));
   }
 
   /* 极光背景效果 */
@@ -89,9 +92,9 @@
     width: 200%;
     height: 200%;
     background:
-      radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
-      radial-gradient(ellipse at 70% 60%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
-      radial-gradient(ellipse at 50% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 30%),
+      radial-gradient(ellipse at 30% 20%, var(--primary-color, rgba(124, 58, 237, 0.15)) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 60%, var(--secondary-color, rgba(139, 92, 246, 0.1)) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 80%, var(--accent-color, rgba(245, 158, 11, 0.08)) 0%, transparent 30%),
       radial-gradient(ellipse at 20% 50%, rgba(244, 63, 94, 0.06) 0%, transparent 30%);
     animation: aurora-move 20s ease-in-out infinite;
   }
@@ -104,8 +107,8 @@
     width: 200%;
     height: 200%;
     background:
-      radial-gradient(ellipse at 60% 30%, rgba(124, 58, 237, 0.08) 0%, transparent 35%),
-      radial-gradient(ellipse at 40% 70%, rgba(245, 158, 11, 0.05) 0%, transparent 35%);
+      radial-gradient(ellipse at 60% 30%, var(--primary-color, rgba(124, 58, 237, 0.08)) 0%, transparent 35%),
+      radial-gradient(ellipse at 40% 70%, var(--accent-color, rgba(245, 158, 11, 0.05)) 0%, transparent 35%);
     animation: aurora-move 25s ease-in-out infinite reverse;
   }
 
@@ -192,10 +195,10 @@
   /* 脉动动画 */
   @keyframes pulse-glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+      box-shadow: 0 0 20px var(--primary-color, rgba(124, 58, 237, 0.3));
     }
     50% {
-      box-shadow: 0 0 40px rgba(124, 58, 237, 0.5);
+      box-shadow: 0 0 40px var(--primary-color, rgba(124, 58, 237, 0.5));
     }
   }
 

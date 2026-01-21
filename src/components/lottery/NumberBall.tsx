@@ -1,4 +1,5 @@
 import { LUCKY_RED_ITEMS, LUCKY_BLUE_ITEMS } from '../../constants/luckyItems';
+import { soundManager } from '../../utils/soundManager';
 
 interface NumberBallProps {
   number: number;
@@ -42,6 +43,14 @@ export function NumberBall({
     if ('vibrate' in navigator) {
       navigator.vibrate(50);
     }
+    
+    // 播放音效
+    if (!selected) {
+      soundManager.playNumberSelect();
+    } else {
+      soundManager.playNumberClear();
+    }
+    
     onClick();
   };
 

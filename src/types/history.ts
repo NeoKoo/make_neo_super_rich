@@ -20,6 +20,8 @@ export interface HistoryRecord {
     blue: number;
   };
   prize?: string;
+  won?: boolean;
+  prizeLevel?: number;
 }
 
 export interface DrawResult {

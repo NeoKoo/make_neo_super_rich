@@ -7,9 +7,14 @@ import { calculateLuckyColor } from '../utils/luckyColor';
 import { Header } from '../components/layout/Header';
 import { Button } from '../components/common/Button';
 import { TabBar } from '../components/layout/TabBar';
+import { SoundSettings } from '../components/settings/SoundSettings';
+import { ThemeSelector } from '../components/theme/ThemeSelector';
+import { NotificationSettings } from '../components/settings/NotificationSettings';
 import { APP_CONFIG } from '../config/app';
 import { getStorageSize } from '../utils/storage';
-import { User, Palette, Database, Info, Save } from 'lucide-react';
+import { User, Palette, Database, Info, Save, TestTube } from 'lucide-react';
+import { notificationManager } from '../utils/notificationManager';
+import { createTestScratchRecord, clearTestScratchRecords, showScratchTestInstructions } from '../utils/testScratchCard';
 
 export function SettingsPage() {
   const { success, error } = useToast();
@@ -28,6 +33,9 @@ export function SettingsPage() {
     const [month, day] = settings.birthDate.split('-');
     setBirthMonth(month);
     setBirthDay(day);
+    
+    // 初始化通知系统
+    notificationManager.requestPermission().catch(console.error);
   }, [settings.name, settings.birthDate]);
 
   const handleSaveSettings = () => {
@@ -170,28 +178,37 @@ export function SettingsPage() {
                   className="w-8 h-8 rounded-full shadow-lg"
                   style={{ backgroundColor: settings.luckyColor.primary }}
                 />
-                <span className="text-sm text-text-primary font-mono">{settings.luckyColor.primary}</span>
+                <span className="text-text-primary font-mono ml-2">{settings.luckyColor.primary}</span>
               </div>
             </div>
 
             <div className="text-xs text-text-muted space-y-2">
               <div>幸运色来源：</div>
               <div className="flex flex-wrap gap-2">
-                {settings.zodiacSign} - 星座
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {settings.luckyColor.woodPurpleColors.slice(0, 3).map((color, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium"
-                    style={{ backgroundColor: color, color: '#fff' }}
-                  >
-                    木质/紫色系
-                  </span>
-                ))}
+                <div className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: settings.luckyColor.woodPurpleColors[0] }}>
+                  {settings.zodiacSign} - 星座
+                </div>
+                <div className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: settings.luckyColor.woodPurpleColors[1] }}>
+                  木质/紫色系
+                </div>
+                <div className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: settings.luckyColor.woodPurpleColors[2] }}>
+                  木质/紫色系
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
+          <ThemeSelector />
+        </div>
+
+        <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
+          <NotificationSettings />
+        </div>
+
+        <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
+          <SoundSettings />
         </div>
 
         <div className="bg-gradient-to-br from-background-secondary/80 to-background-tertiary/50 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
@@ -241,6 +258,59 @@ export function SettingsPage() {
               基于幸运色的双色球/大乐透选号工具
             </div>
             <div className="text-amber-400 font-medium">助您好运连连！🍀</div>
+          </div>
+        </div>
+
+        {/* 测试工具区域 */}
+        <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-2xl border border-white/10 p-5 backdrop-blur-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-amber-500/20 rounded-xl">
+              <TestTube className="w-5 h-5 text-amber-400" />
+            </div>
+            <h3 className="text-lg font-bold text-text-primary">测试工具</h3>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  createTestScratchRecord();
+                  success('测试刮刮乐记录已创建');
+                  showScratchTestInstructions();
+                }}
+                variant="primary"
+                size="sm"
+              >
+                创建测试记录
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  clearTestScratchRecords();
+                  success('测试刮刮乐记录已清除');
+                  showScratchTestInstructions();
+                }}
+                variant="secondary"
+                size="sm"
+              >
+                清除测试记录
+              </Button>
+            </div>
+            
+            <div className="text-xs text-text-muted bg-amber-500/10 rounded-lg p-3">
+              <div className="font-medium mb-2">📋 使用说明：</div>
+              <div>1. 点击&ldquo;创建测试记录&rdquo;生成一个带开奖结果的测试记录</div>
+              <div>2. 进入历史记录页面，找到以&ldquo;test-scratch-&rdquo;开头的记录</div>
+              <div>3. 点击&ldquo;检查开奖&rdquo;按钮获取开奖结果</div>
+              <div>4. 刮开银色覆盖层查看开奖号码</div>
+              <div>5. 刮开50%会自动显示全部内容</div>
+              <div>6. 点击&ldquo;清除测试记录&rdquo;可清理所有测试记录</div>
+            </div>
+            
+            <div className="text-xs text-text-muted bg-blue-500/10 rounded-lg p-3">
+              <div className="font-medium mb-2">💡 提示：</div>
+              <div>打开浏览器控制台查看详细操作说明</div>
+            </div>
           </div>
         </div>
       </div>

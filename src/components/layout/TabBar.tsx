@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Target, History, Settings } from 'lucide-react';
+import { Target, History, Settings, BarChart3 } from 'lucide-react';
+import { soundManager } from '../../utils/soundManager';
 
 interface TabItem {
   id: string;
@@ -10,6 +11,7 @@ interface TabItem {
 
 const tabs: TabItem[] = [
   { id: 'home', label: '选号', icon: Target, path: '/' },
+  { id: 'analysis', label: '分析', icon: BarChart3, path: '/analysis' },
   { id: 'history', label: '历史', icon: History, path: '/history' },
   { id: 'settings', label: '设置', icon: Settings, path: '/settings' }
 ];
@@ -27,6 +29,11 @@ export function TabBar() {
             <Link
               key={tab.id}
               to={tab.path}
+              onClick={() => {
+                if (!isActive) {
+                  soundManager.playTabSwitch();
+                }
+              }}
               className={`
                 flex flex-col items-center py-2 px-4 flex-1
                 transition-all duration-300

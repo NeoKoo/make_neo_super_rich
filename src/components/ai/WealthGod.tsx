@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LotteryType } from '../../types/lottery';
 import { getAIRecommendation } from '../../utils/aiService';
+import { soundManager } from '../../utils/soundManager';
 
 interface WealthGodProps {
   lotteryType: LotteryType;
@@ -183,7 +184,10 @@ export function WealthGod({ lotteryType, zodiacSign, birthDate, userName, onSele
 
               <div className="space-y-3">
                 <button
-                  onClick={handleRequest}
+                  onClick={() => {
+                    soundManager.playAIRecommendation();
+                    handleRequest();
+                  }}
                   disabled={loading}
                   className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] ${
                     loading
