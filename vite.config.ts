@@ -74,7 +74,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/apis\.juhe\.cn\/.*/i,
+            urlPattern: /^https:\/\/api\.jisuapi\.com\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'lottery-api-cache',
@@ -94,6 +94,14 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
-    open: true
+    open: true,
+    proxy: {
+      '/api': {
+        target: 'https://api.jisuapi.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: true
+      }
+    }
   }
 });

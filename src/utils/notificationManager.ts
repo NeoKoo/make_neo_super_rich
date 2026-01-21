@@ -1,5 +1,5 @@
 import { Reminder, NotificationSettings } from '../types/notifications';
-import { getNextDrawTime, isNearDrawTime, formatDrawTime } from '../constants/lotterySchedule';
+import { getNextDrawTime, formatDrawTime } from '../constants/lotterySchedule';
 import { soundManager } from './soundManager';
 
 class NotificationManager {

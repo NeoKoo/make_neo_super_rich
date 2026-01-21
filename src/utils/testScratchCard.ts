@@ -1,4 +1,4 @@
-import { useHistory } from '../hooks/useHistory';
+import { HistoryRecord } from '../types/history';
 
 /**
  * 创建测试历史记录，用于测试刮刮乐效果

@@ -1,6 +1,4 @@
 import { useMemo } from 'react';
-import { LotteryType } from '../types/lottery';
-import { HistoryRecord } from '../types/history';
 import { AnalysisData } from '../types/analysis';
 import { AnalysisService } from '../utils/analysisService';
 import { useHistory } from './useHistory';

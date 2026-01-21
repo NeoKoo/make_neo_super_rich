@@ -10,13 +10,18 @@ import { RefreshCw, Trash2, FileText } from 'lucide-react';
 
 export function HistoryPage() {
   const { history, clearHistory, deleteHistory } = useHistory();
-  const { loading, fetchAndCheckDraws } = useLotteryAPI();
-  const { success, info } = useToast();
+  const { loading, error, fetchAndCheckDraws } = useLotteryAPI();
+  const { success, info, error: showError } = useToast();
 
   const [confirmClear, setConfirmClear] = useState(false);
 
   const handleCheckDraws = async () => {
     const updatedRecords = await fetchAndCheckDraws(history);
+
+    if (error) {
+      showError(error);
+      return;
+    }
 
     if (updatedRecords.some(r => r.drawNumbers && !history.find(h => h.id === r.id)?.drawNumbers)) {
       success('开奖结果已更新');

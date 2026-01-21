@@ -10,7 +10,7 @@ export function useLotteryAPI() {
   const fetchAndCheckDraws = useCallback(async (history: HistoryRecord[]): Promise<HistoryRecord[]> => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const updatedRecords = await Promise.all(
         history.map(async (record) => {
@@ -20,7 +20,7 @@ export function useLotteryAPI() {
 
           const cached = getDrawFromCache(record.lotteryId);
           let drawResult: DrawResult | null = null;
-          
+
           if (cached) {
             drawResult = {
               lotteryId: cached.lotteryId,
@@ -30,14 +30,20 @@ export function useLotteryAPI() {
               issue: cached.lotteryId
             };
           } else {
-            drawResult = await fetchDrawByIssue(record.lotteryType, record.lotteryId);
+            try {
+              drawResult = await fetchDrawByIssue(record.lotteryType, record.lotteryId);
+            } catch (fetchError) {
+              console.warn(`查询期号 ${record.lotteryId} 失败:`, fetchError);
+              // 即使单个查询失败，也继续处理其他记录
+              return record;
+            }
           }
-          
+
           if (drawResult) {
             saveDrawToCache(drawResult);
-            
+
             const match = calculatePrize(record.numbers, drawResult.numbers, record.lotteryType);
-            
+
             return {
               ...record,
               drawDate: drawResult.drawDate,
@@ -49,14 +55,16 @@ export function useLotteryAPI() {
               prize: match.prize
             };
           }
-          
+
           return record;
         })
       );
-      
+
       return updatedRecords;
     } catch (err) {
-      setError(err instanceof Error ? err.message : '查询失败');
+      const errorMessage = err instanceof Error ? err.message : '查询失败';
+      setError(errorMessage);
+      console.error('批量查询开奖结果失败:', err);
       return history;
     } finally {
       setLoading(false);
