@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getDailyFortune, isLuckyTime } from '../../utils/fortuneService';
+import { getDailyFortune, isLuckyTime, getEnhancedDailyFortune } from '../../utils/fortuneService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { APP_CONFIG } from '../../config/app';
 import { LotteryType } from '../../types/lottery';
 import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle } from 'lucide-react';
+import { MetaphysicsCard } from './MetaphysicsCard';
+import { RecommendedNumbers } from './RecommendedNumbers';
+import type { EnhancedDailyFortune } from '../../types/fortune';
 
 interface DailyFortuneProps {
   lotteryType: LotteryType;
@@ -20,6 +23,7 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
     luckyHour: number;
     reason: string;
   } | null>(null);
+  const [enhancedFortune, setEnhancedFortune] = useState<EnhancedDailyFortune | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zodiacSign, setZodiacSign] = useState('');
@@ -40,6 +44,7 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
     setError(null);
 
     try {
+      // 获取基础运势
       const result = await getDailyFortune(
         zodiacSign,
         lotteryType as string,
@@ -55,13 +60,25 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         console.error('[DailyFortune Error] Unknown error - no data and no error');
         setError('暂时无法获取运势');
       }
+
+      // 获取增强运势（包含玄学分析）
+      const enhancedResult = await getEnhancedDailyFortune(
+        settings.name,
+        zodiacSign,
+        settings.birthDate,
+        lotteryType
+      );
+
+      if (enhancedResult.success && enhancedResult.data) {
+        setEnhancedFortune(enhancedResult.data);
+      }
     } catch (err) {
       console.error('[DailyFortune Exception]', err);
       setError('获取运势失败');
     } finally {
       setLoading(false);
     }
-  }, [zodiacSign, lotteryType, settings.birthDate]);
+  }, [zodiacSign, lotteryType, settings.birthDate, settings.name]);
 
   useEffect(() => {
     fetchDailyFortune()
@@ -189,6 +206,23 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p>{fortune.reason}</p>
       </div>
+
+      {/* 玄学分析卡片 */}
+      {enhancedFortune && (
+        <MetaphysicsCard
+          nameAnalysis={enhancedFortune.metaphysics.nameAnalysis}
+          zodiacAnalysis={enhancedFortune.metaphysics.zodiacAnalysis}
+          wuxingAnalysis={enhancedFortune.metaphysics.wuxingAnalysis}
+          numerologyAnalysis={enhancedFortune.metaphysics.numerologyAnalysis}
+        />
+      )}
+
+      {/* 推荐号码 */}
+      {enhancedFortune && (
+        <RecommendedNumbers
+          numbers={enhancedFortune.metaphysics.recommendedNumbers}
+        />
+      )}
     </div>
   );
 }
