@@ -7,15 +7,17 @@ import { HistoryItem } from '../components/history/HistoryItem';
 import { Loading } from '../components/common/Loading';
 import { TabBar } from '../components/layout/TabBar';
 import { RefreshCw, Trash2, FileText } from 'lucide-react';
+import { soundManager } from '../utils/soundManager';
 
 export function HistoryPage() {
-  const { history, clearHistory, deleteHistory } = useHistory();
+  const { history, clearHistory, deleteHistory, updateHistory } = useHistory();
   const { loading, error, fetchAndCheckDraws } = useLotteryAPI();
   const { success, info, error: showError } = useToast();
 
   const [confirmClear, setConfirmClear] = useState(false);
 
   const handleCheckDraws = async () => {
+    soundManager.playButtonClick();
     const updatedRecords = await fetchAndCheckDraws(history);
 
     if (error) {
@@ -23,7 +25,21 @@ export function HistoryPage() {
       return;
     }
 
+    // 更新历史记录
+    updatedRecords.forEach(updatedRecord => {
+      const originalRecord = history.find(h => h.id === updatedRecord.id);
+      if (originalRecord && !originalRecord.drawNumbers && updatedRecord.drawNumbers) {
+        updateHistory(updatedRecord.id, {
+          drawDate: updatedRecord.drawDate,
+          drawNumbers: updatedRecord.drawNumbers,
+          matchCount: updatedRecord.matchCount,
+          prize: updatedRecord.prize
+        });
+      }
+    });
+
     if (updatedRecords.some(r => r.drawNumbers && !history.find(h => h.id === r.id)?.drawNumbers)) {
+      soundManager.playNotification();
       success('开奖结果已更新');
     } else {
       info('暂无新的开奖结果');

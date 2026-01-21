@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { soundManager } from '../../utils/soundManager';
 
 interface ScratchCardProps {
   children: React.ReactNode;
@@ -83,6 +84,7 @@ export function ScratchCard({ children, onReveal, revealed = false, coverText = 
 
   const handleStart = (e: React.PointerEvent<HTMLCanvasElement>) => {
     setIsScratching(true);
+    soundManager.playScratchCard();
     scratch(e);
   };
 
@@ -146,6 +148,7 @@ export function ScratchCard({ children, onReveal, revealed = false, coverText = 
 
   const revealAll = () => {
     setIsRevealed(true);
+    soundManager.playWinCelebration();
     onReveal?.();
   };
 
