@@ -54,4 +54,4 @@ export const NumberGrid = memo(function NumberGrid({
       </div>
     </div>
   );
-}
+});

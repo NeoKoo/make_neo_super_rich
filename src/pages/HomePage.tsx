@@ -37,6 +37,7 @@ export function HomePage() {
   const [zodiacSign, setZodiacSign] = useState('');
   const [showCoinsAfterExplosion, setShowCoinsAfterExplosion] = useState(false);
   const [showShenlongSummon, setShowShenlongSummon] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
     const birthDate = settings.birthDate;
@@ -59,41 +60,47 @@ export function HomePage() {
     }
   };
  
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isComplete) {
       error('请先完成选号');
       return;
     }
- 
-    if ('vibrate' in navigator) {
-      navigator.vibrate([100, 50, 100]);
+
+    setIsSaving(true);
+
+    try {
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100]);
+      }
+
+      const today = getLocalDateFromBeijing();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const lotteryId = `${year}${month}${day}`;
+
+      addHistory({
+        lotteryType: lotteryType,
+        lotteryId,
+        numbers: { redBalls, blueBalls },
+        timestamp: Date.now(),
+        strategyType: 'ai_god',
+      });
+
+      success('保存成功');
+
+      setTimeout(() => {
+        console.log('[HomePage] Triggering celebration animations');
+        setShowCoinsAfterExplosion(true);
+        setShowShenlongSummon(true);
+      }, 1000);
+
+      setTimeout(() => {
+        navigate('/history');
+      }, 5500);
+    } finally {
+      setIsSaving(false);
     }
- 
-    const today = getLocalDateFromBeijing();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const lotteryId = `${year}${month}${day}`;
- 
-    addHistory({
-      lotteryType: lotteryType,
-      lotteryId,
-      numbers: { redBalls, blueBalls },
-      timestamp: Date.now(),
-      strategyType: 'ai_god',
-    });
- 
-    success('保存成功');
- 
-    setTimeout(() => {
-      console.log('[HomePage] Triggering celebration animations');
-      setShowCoinsAfterExplosion(true);
-      setShowShenlongSummon(true);
-    }, 1000);
- 
-    setTimeout(() => {
-      navigate('/history');
-    }, 5500);
   };
  
   const handleAIRecommend = (redBalls: number[], blueBalls: number[]) => {
@@ -193,6 +200,7 @@ export function HomePage() {
         onSave={handleSave}
         isComplete={isComplete}
         lotteryType={lotteryType}
+        loading={isSaving}
       />
 
       <DragonBallAnimation

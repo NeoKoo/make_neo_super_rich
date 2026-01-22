@@ -5,6 +5,7 @@ import { TabBar } from '../components/layout/TabBar';
 import { HotColdNumbers } from '../components/analysis/HotColdNumbers';
 import { PersonalAnalysis } from '../components/analysis/PersonalAnalysis';
 import { Loading } from '../components/common/Loading';
+import { SkeletonAnalysis } from '../components/common/Skeleton';
 import { BarChart3, TrendingUp, User, RefreshCw } from 'lucide-react';
 
 type AnalysisTab = 'hotcold' | 'personal';
@@ -100,7 +101,9 @@ export function AnalysisPage() {
 
       {/* 内容区域 */}
       <div className="px-4 pt-6 pb-36">
-        {activeTab === 'hotcold' ? (
+        {refreshing ? (
+          <SkeletonAnalysis />
+        ) : activeTab === 'hotcold' ? (
           <div className="space-y-6">
             <HotColdNumbers
               analysis={analysisData.hotColdAnalysis.red}

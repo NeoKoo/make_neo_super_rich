@@ -6,6 +6,7 @@ import { LotteryType } from '../../types/lottery';
 import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle, Bell, BellOff } from 'lucide-react';
 import { MetaphysicsCard } from './MetaphysicsCard';
 import { RecommendedNumbers } from './RecommendedNumbers';
+import { SkeletonFortune } from '../common/Skeleton';
 import type { EnhancedDailyFortune } from '../../types/fortune';
 import { addReminder, getReminders, removeReminder } from '../../utils/notificationManager';
 
@@ -134,15 +135,7 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
   };
 
   if (loading) {
-    return (
-      <div className="relative overflow-hidden bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-fuchsia-500/20 rounded-2xl p-5 mb-4 border border-purple-400/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent animate-[shimmer_2s_infinite]" />
-        <div className="flex items-center justify-center gap-3 relative z-10">
-          <Sparkles className="w-5 h-5 text-purple-400 animate-spin" />
-          <span className="text-sm text-purple-200">正在获取今日运势...</span>
-        </div>
-      </div>
-    );
+    return <SkeletonFortune />;
   }
 
   if (error) {

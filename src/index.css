@@ -233,6 +233,16 @@
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
+
+  /* 加载进度条动画 */
+  @keyframes loadingProgress {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
 
 /* 响应式调整 */

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toast } from './components/common/Toast';
+import { GlobalLoadingProvider } from './components/common/GlobalLoading';
 import { TabBar } from './components/layout/TabBar';
 import { useToast } from './hooks/useToast';
 import { HomePage } from './pages/HomePage';
@@ -23,21 +24,23 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* 极光背景层 */}
-      <div className="aurora-bg" />
+      <GlobalLoadingProvider>
+        {/* 极光背景层 */}
+        <div className="aurora-bg" />
 
-      <TabBar />
+        <TabBar />
 
-      <div className="min-h-screen bg-transparent text-text-primary relative">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/analysis" element={<AnalysisPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
+        <div className="min-h-screen bg-transparent text-text-primary relative">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/analysis" element={<AnalysisPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
 
-        <Toast toasts={toasts} onRemove={removeToast} />
-      </div>
+          <Toast toasts={toasts} onRemove={removeToast} />
+        </div>
+      </GlobalLoadingProvider>
     </BrowserRouter>
   );
 }

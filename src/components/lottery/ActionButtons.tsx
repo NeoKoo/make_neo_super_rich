@@ -1,4 +1,5 @@
 import { CopyButton } from '../common/CopyButton';
+import { Button } from '../common/Button';
 import { Trash2, Save, Dices } from 'lucide-react';
 import { NumberBall } from './NumberBall';
 import { soundManager } from '../../utils/soundManager';
@@ -11,6 +12,7 @@ interface ActionButtonsProps {
   onSave: () => void;
   isComplete: boolean;
   lotteryType: string;
+  loading?: boolean;
 }
 
 export function ActionButtons({
@@ -20,7 +22,8 @@ export function ActionButtons({
   onRandom,
   onSave,
   isComplete,
-  lotteryType
+  lotteryType,
+  loading = false
 }: ActionButtonsProps) {
   const redLabel = lotteryType === '双色球' ? '红球' : '前区';
   const blueLabel = lotteryType === '双色球' ? '蓝球' : '后区';
@@ -69,29 +72,35 @@ export function ActionButtons({
             </div>
 
             <div className="flex gap-1.5 flex-shrink-0">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => {
                   soundManager.playNumberClear();
                   onClear();
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-700/80 hover:bg-gray-600 text-white text-xs font-medium transition-all duration-300 hover:scale-105"
+                loading={loading}
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>清除</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => {
                   soundManager.playStrategySelect();
                   onRandom();
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white text-xs font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/25"
+                loading={loading}
               >
                 <Dices className="w-3.5 h-3.5" />
                 <span>随机</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant={isComplete ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => {
                   if (isComplete) {
                     soundManager.playSaveSuccess();
@@ -99,17 +108,12 @@ export function ActionButtons({
                   }
                 }}
                 disabled={!isComplete}
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-300
-                  ${isComplete
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-lg shadow-green-500/25 hover:scale-105'
-                    : 'bg-gray-600/80 text-text-muted cursor-not-allowed'
-                  }
-                `}
+                loading={loading}
+                className={isComplete ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 shadow-lg shadow-green-500/25' : ''}
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>保存</span>
-              </button>
+              </Button>
 
               <CopyButton
                 numbers={{ redBalls, blueBalls }}

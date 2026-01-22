@@ -5,6 +5,7 @@ import { useToast } from '../hooks/useToast';
 import { Header } from '../components/layout/Header';
 import { HistoryItem } from '../components/history/HistoryItem';
 import { Loading } from '../components/common/Loading';
+import { SkeletonList } from '../components/common/Skeleton';
 import { TabBar } from '../components/layout/TabBar';
 import { RefreshCw, Trash2, FileText } from 'lucide-react';
 import { soundManager } from '../utils/soundManager';
@@ -89,7 +90,9 @@ export function HistoryPage() {
       />
 
       <div className="px-4 pt-4 pb-36 sm:pb-32">
-        {history.length === 0 ? (
+        {loading ? (
+          <SkeletonList count={3} />
+        ) : history.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
               <FileText className="w-10 h-10 text-purple-400" />
