@@ -37,7 +37,7 @@ export function ShenlongSummon({ trigger, onComplete }: ShenlongSummonProps) {
   if (!visible) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[200] pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-[30] pointer-events-none overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-amber-900/30 via-orange-900/20 to-transparent animate-fade-in" />
 
       <div className="absolute inset-0 animate-shenlong-particles">

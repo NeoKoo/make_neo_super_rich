@@ -54,7 +54,7 @@ export function CoinAnimation({ trigger, type = 'small', onComplete }: CoinAnima
   if (!trigger || coins.length === 0) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-[50] pointer-events-none overflow-hidden">
       {coins.map(coin => (
         <div
           key={coin.id}
