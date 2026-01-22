@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { NumberBall } from './NumberBall';
 
 interface NumberGridProps {
@@ -11,7 +12,7 @@ interface NumberGridProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function NumberGrid({
+export const NumberGrid = memo(function NumberGrid({
   title,
   min,
   max,
