@@ -38,7 +38,7 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 rounded-2xl border border-amber-400/20 overflow-hidden">
+    <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 rounded-2xl border border-amber-400/20 overflow-hidden relative z-0">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
