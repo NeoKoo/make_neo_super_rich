@@ -3,10 +3,11 @@ import { getDailyFortune, isLuckyTime, getEnhancedDailyFortune } from '../../uti
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { APP_CONFIG } from '../../config/app';
 import { LotteryType } from '../../types/lottery';
-import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle } from 'lucide-react';
+import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle, Bell, BellOff } from 'lucide-react';
 import { MetaphysicsCard } from './MetaphysicsCard';
 import { RecommendedNumbers } from './RecommendedNumbers';
 import type { EnhancedDailyFortune } from '../../types/fortune';
+import { addReminder, getReminders, removeReminder } from '../../utils/notificationManager';
 
 interface DailyFortuneProps {
   lotteryType: LotteryType;
@@ -27,6 +28,43 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zodiacSign, setZodiacSign] = useState('');
+  const [luckyTimeReminderId, setLuckyTimeReminderId] = useState<string | null>(null);
+
+  // 检查是否已设置幸运时间提醒
+  useEffect(() => {
+    const reminders = getReminders();
+    const luckyReminder = reminders.find(r => r.id === 'lucky_time_reminder');
+    if (luckyReminder) {
+      setLuckyTimeReminderId(luckyReminder.id);
+    }
+  }, []);
+
+  // 切换幸运时间提醒
+  const toggleLuckyTimeReminder = useCallback(() => {
+    if (luckyTimeReminderId) {
+      // 取消提醒
+      removeReminder(luckyTimeReminderId);
+      setLuckyTimeReminderId(null);
+    } else if (fortune) {
+      // 添加提醒
+      const today = new Date();
+      const [startStr, endStr] = fortune.luckyTime.split('-').map(t => t.trim());
+      const [endHour, endMin] = endStr.split(':').map(Number);
+
+      // 设置提醒时间（提前5分钟）
+      const reminderTime = new Date(today);
+      reminderTime.setHours(endHour, endMin - 5, 0, 0);
+
+      const id = addReminder({
+        lotteryType: '双色球',
+        drawTime: reminderTime,
+        message: '幸运购彩时间提醒',
+        enabled: true,
+        minutesBefore: 5
+      });
+      setLuckyTimeReminderId(id);
+    }
+  }, [fortune, luckyTimeReminderId]);
 
   useEffect(() => {
     const birthDate = settings.birthDate;
@@ -192,6 +230,17 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
               <div className={`text-lg font-bold ${isNowLucky ? 'text-white' : 'text-amber-300'}`}>
                 {fortune.luckyTime}
               </div>
+              <button
+                onClick={toggleLuckyTimeReminder}
+                className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                title={luckyTimeReminderId ? '取消提醒' : '设置提醒'}
+              >
+                {luckyTimeReminderId ? (
+                  <BellOff className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
+                ) : (
+                  <Bell className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
+                )}
+              </button>
             </div>
           </div>
           {isNowLucky && (
