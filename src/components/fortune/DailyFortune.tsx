@@ -48,7 +48,7 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
     } else if (fortune) {
       // 添加提醒
       const today = new Date();
-      const [startStr, endStr] = fortune.luckyTime.split('-').map(t => t.trim());
+      const [, endStr] = fortune.luckyTime.split('-').map(t => t.trim());
       const [endHour, endMin] = endStr.split(':').map(Number);
 
       // 设置提醒时间（提前5分钟）
