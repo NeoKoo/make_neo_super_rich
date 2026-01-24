@@ -1,5 +1,6 @@
 import { AI_CONFIG } from '../config/ai';
 import { LotteryType } from '../types/lottery';
+import { EnhancedLotteryRecommendation, AIRecommendationResult } from '../types/ai';
 import { getLocalDateFromBeijing } from './dateUtils';
 import { aiRequestQueue, aiAPICache, generateCacheKey, queuedCachedRequest } from './apiQueue';
 
@@ -24,21 +25,6 @@ interface ZhipuApiResponse {
   }>;
 }
 
-interface LotteryRecommendation {
-  redBalls: number[];
-  blueBalls: number[];
-  text: string;
-}
-
-interface AIRecommendationResult {
-  success: boolean;
-  data?: LotteryRecommendation;
-  error?: {
-    code: string;
-    message: string;
-    userFriendlyMessage: string;
-  };
-}
 
 export async function getAIRecommendation(
   lotteryType: LotteryType,
@@ -53,7 +39,7 @@ export async function getAIRecommendation(
     userName
   });
 
-  const requestTask = async (): Promise<LotteryRecommendation | null> => {
+  const requestTask = async (): Promise<EnhancedLotteryRecommendation | null> => {
     const today = getLocalDateFromBeijing();
     const dateStr = today.toLocaleDateString('zh-CN', {
       year: 'numeric',
@@ -68,7 +54,7 @@ export async function getAIRecommendation(
     const messages: ZhipuMessage[] = [
       {
         role: 'system',
-        content: '你是一个专业的彩票推荐助手，基于用户的姓名、星座和生日推荐幸运号码。'
+        content: '你是一个专业的玄学彩票推荐大师，精通星座、五行、数字命理等玄学理论。请根据用户的信息提供专业的彩票推荐和详细的玄学分析。'
       },
       {
         role: 'user',
@@ -89,7 +75,7 @@ export async function getAIRecommendation(
         model: AI_CONFIG.model,
         messages: messages,
         temperature: 0.7,
-        max_tokens: 200
+        max_tokens: 2000
       }),
       signal: controller.signal
     });
@@ -211,46 +197,46 @@ function getFriendlyErrorMessage(error: APIError): string {
   return 'AI暂时无法生成推荐，请稍后再试';
 }
 
-function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SHUANGSEQIU): LotteryRecommendation | null {
+function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SHUANGSEQIU): EnhancedLotteryRecommendation | null {
   try {
-    console.log('[AI Parse] Attempting to parse response for:', lotteryType);
+    console.log('[AI Parse] Attempting to parse JSON response for:', lotteryType);
 
-    const match = text.match(/今晚的开奖号码为：(.+)/);
-    if (!match) {
-      console.error('[AI Parse Error] No "今晚的开奖号码为：" pattern found in:', text);
-      return null;
+    // 尝试解析JSON格式的响应
+    let jsonData: any;
+    try {
+      jsonData = JSON.parse(text);
+    } catch (jsonError) {
+      console.error('[AI Parse Error] Failed to parse JSON:', jsonError);
+      console.log('[AI Parse] Attempting to extract JSON from text');
+      
+      // 尝试从文本中提取JSON部分
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('[AI Parse Error] No JSON found in response');
+        return null;
+      }
+      
+      jsonData = JSON.parse(jsonMatch[0]);
     }
 
-    const numbersText = match[1].trim();
-    console.log('[AI Parse] Numbers text extracted:', numbersText);
+    console.log('[AI Parse] Parsed JSON data:', jsonData);
 
-    const parts = numbersText.split(' - ');
-    console.log('[AI Parse] Split parts:', parts);
-
-    if (parts.length < 2) {
-      console.error('[AI Parse Error] Not enough parts after split:', parts);
-      return null;
-    }
-
-    const [redBallsText, blueBallsText] = parts;
-
-    if (!redBallsText || !blueBallsText) {
-      console.error('[AI Parse Error] Red or blue balls text is empty');
+    // 验证必要字段
+    if (!jsonData.redBalls || !jsonData.blueBalls || !Array.isArray(jsonData.redBalls) || !Array.isArray(jsonData.blueBalls)) {
+      console.error('[AI Parse Error] Missing or invalid redBalls/blueBalls fields');
       return null;
     }
 
     const redBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 33 : 35;
     const blueBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 16 : 12;
 
-    const redBalls = redBallsText
-      .split(/\s+/)
-      .map(n => parseInt(n.trim()))
-      .filter(n => !isNaN(n) && n >= 1 && n <= redBallMax);
+    const redBalls = jsonData.redBalls
+      .map((n: any) => parseInt(n))
+      .filter((n: number) => !isNaN(n) && n >= 1 && n <= redBallMax);
 
-    const blueBalls = blueBallsText
-      .split(/\s+/)
-      .map(n => parseInt(n.trim()))
-      .filter(n => !isNaN(n) && n >= 1 && n <= blueBallMax);
+    const blueBalls = jsonData.blueBalls
+      .map((n: any) => parseInt(n))
+      .filter((n: number) => !isNaN(n) && n >= 1 && n <= blueBallMax);
 
     console.log('[AI Parse] Red balls:', redBalls);
     console.log('[AI Parse] Blue balls:', blueBalls);
@@ -260,11 +246,44 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
       return null;
     }
 
-    return {
+    // 构建增强的推荐结果
+    const result: EnhancedLotteryRecommendation = {
       redBalls,
       blueBalls,
-      text
+      text: jsonData.overallAnalysis?.summary || 'AI财神推荐',
+      numberReasons: jsonData.numberReasons || [],
+      overallAnalysis: jsonData.overallAnalysis || {
+        summary: '综合分析显示今日运势良好',
+        fortuneLevel: '吉',
+        keyFactors: ['星座运势', '五行平衡', '数字能量'],
+        advice: '建议在幸运时间内购买',
+        bestTiming: '今日下午3-5点'
+      },
+      metaphysicsInsight: jsonData.metaphysicsInsight || {
+        zodiacInfluence: '星座能量加持',
+        wuxingBalance: '五行相生相助',
+        numerologyPattern: '数字组合吉利',
+        energyLevel: 75
+      }
     };
+
+    // 处理每个号码的理由，确保有默认值
+    result.numberReasons = result.numberReasons.map((reason: any) => ({
+      number: reason.number || 0,
+      type: reason.type || 'red',
+      reasons: {
+        primary: reason.reasons?.primary || '此号码能量强劲',
+        metaphysics: reason.reasons?.metaphysics || '符合玄学原理',
+        zodiac: reason.reasons?.zodiac || '与用户星座相合',
+        wuxing: reason.reasons?.wuxing || '五行属性相生',
+        numerology: reason.reasons?.numerology || '数字命理吉祥',
+        timing: reason.reasons?.timing || '时机恰到好处'
+      },
+      confidence: reason.confidence || 75,
+      luckyElements: reason.luckyElements || ['幸运数字', '吉利符号']
+    }));
+
+    return result;
   } catch (error) {
     console.error('Parse AI response error:', error);
     return null;

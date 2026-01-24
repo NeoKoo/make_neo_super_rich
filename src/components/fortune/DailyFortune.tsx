@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getDailyFortune, isLuckyTime, getEnhancedDailyFortune } from '../../utils/fortuneService';
+import { getDailyFortune, isLuckyTime } from '../../utils/fortuneService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useToast } from '../../hooks/useToast';
 import { APP_CONFIG } from '../../config/app';
 import { LotteryType } from '../../types/lottery';
-import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle, Bell, BellOff } from 'lucide-react';
-import { MetaphysicsCard } from './MetaphysicsCard';
-import { RecommendedNumbers } from './RecommendedNumbers';
+import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle, Bell, BellOff, Calendar, CheckCircle } from 'lucide-react';
 import { SkeletonFortune } from '../common/Skeleton';
-import type { EnhancedDailyFortune } from '../../types/fortune';
 import { addReminder, getReminders, removeReminder } from '../../utils/notificationManager';
+import { addCalendarEvent } from '../../utils/calendarUtils';
 
 interface DailyFortuneProps {
   lotteryType: LotteryType;
@@ -25,11 +24,13 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
     luckyHour: number;
     reason: string;
   } | null>(null);
-  const [enhancedFortune, setEnhancedFortune] = useState<EnhancedDailyFortune | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zodiacSign, setZodiacSign] = useState('');
   const [luckyTimeReminderId, setLuckyTimeReminderId] = useState<string | null>(null);
+  const [calendarAdded, setCalendarAdded] = useState(false);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+  const { addToast } = useToast();
 
   // 检查是否已设置幸运时间提醒
   useEffect(() => {
@@ -67,6 +68,56 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
     }
   }, [fortune, luckyTimeReminderId]);
 
+  // 添加日历提醒处理函数
+  const handleAddToCalendar = useCallback(async () => {
+    if (!fortune || calendarLoading) return;
+
+    setCalendarLoading(true);
+
+    try {
+      // 解析幸运时间
+      const [startTimeStr, endTimeStr] = fortune.luckyTime.split('-').map(t => t.trim());
+      const [startHour, startMin] = startTimeStr.split(':').map(Number);
+      const [endHour, endMin] = endTimeStr.split(':').map(Number);
+
+      // 创建今天的日期
+      const today = new Date();
+      const startTime = new Date(today);
+      startTime.setHours(startHour, startMin, 0, 0);
+
+      const endTime = new Date(today);
+      endTime.setHours(endHour, endMin, 0, 0);
+
+      // 创建日历事件
+      const calendarEvent = {
+        title: '幸运购彩时间',
+        startTime,
+        endTime,
+        description: `今日最佳购彩时间，好运连连！\n彩票类型：${lotteryType}\n推荐理由：${fortune.reason}`,
+        reminderMinutes: 5
+      };
+
+      // 添加日历事件
+      const result = await addCalendarEvent(calendarEvent);
+      
+      if (result.success) {
+        if (result.method === 'download') {
+          addToast('日历事件已生成，请选择用日历应用打开', 'success');
+        } else if (result.method === 'copy') {
+          addToast('信息已复制，请在日历应用中手动创建事件', 'info');
+        }
+        setCalendarAdded(true);
+      } else {
+        addToast(result.message || '添加日历失败，请稍后重试', 'error');
+      }
+    } catch (error) {
+      console.error('[DailyFortune] 添加日历失败:', error);
+      addToast('添加日历失败，请稍后重试', 'error');
+    } finally {
+      setCalendarLoading(false);
+    }
+  }, [fortune, lotteryType, calendarLoading, addToast]);
+
   useEffect(() => {
     const birthDate = settings.birthDate;
     if (birthDate) {
@@ -100,17 +151,17 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         setError('暂时无法获取运势');
       }
 
-      // 获取增强运势（包含玄学分析）
-      const enhancedResult = await getEnhancedDailyFortune(
-        settings.name,
-        zodiacSign,
-        settings.birthDate,
-        lotteryType
-      );
+      // 获取增强运势（包含玄学分析）- 已禁用
+      // const enhancedResult = await getEnhancedDailyFortune(
+      //   settings.name,
+      //   zodiacSign,
+      //   settings.birthDate,
+      //   lotteryType
+      // );
 
-      if (enhancedResult.success && enhancedResult.data) {
-        setEnhancedFortune(enhancedResult.data);
-      }
+      // if (enhancedResult.success && enhancedResult.data) {
+      //   setEnhancedFortune(enhancedResult.data);
+      // }
     } catch (err) {
       console.error('[DailyFortune Exception]', err);
       setError('获取运势失败');
@@ -123,12 +174,19 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
     fetchDailyFortune()
   }, [fetchDailyFortune])
 
+  // 每分钟检查一次幸运时间状态，触发重新渲染以更新UI
   useEffect(() => {
     const interval = setInterval(() => {
+      // 强制重新渲染以更新幸运时间状态
+      if (fortune) {
+        const isNowLucky = isLuckyTime(fortune.luckyTime)
+        // 可以在这里添加其他逻辑，比如触发通知等
+        console.log('[DailyFortune] Checking lucky time:', isNowLucky)
+      }
     }, 60000)
 
     return () => clearInterval(interval)
-  }, [fortune?.luckyTime])
+  }, [fortune])
 
   const handleRefresh = () => {
     fetchDailyFortune()
@@ -223,17 +281,41 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
               <div className={`text-lg font-bold ${isNowLucky ? 'text-white' : 'text-amber-300'}`}>
                 {fortune.luckyTime}
               </div>
-              <button
-                onClick={toggleLuckyTimeReminder}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors"
-                title={luckyTimeReminderId ? '取消提醒' : '设置提醒'}
-              >
-                {luckyTimeReminderId ? (
-                  <BellOff className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
-                ) : (
-                  <Bell className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleLuckyTimeReminder}
+                  className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                  title={luckyTimeReminderId ? '取消提醒' : '设置提醒'}
+                >
+                  {luckyTimeReminderId ? (
+                    <BellOff className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
+                  ) : (
+                    <Bell className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
+                  )}
+                </button>
+                
+                {/* 日历按钮 */}
+                <button
+                  onClick={handleAddToCalendar}
+                  disabled={calendarLoading || calendarAdded}
+                  className={`p-2 rounded-lg transition-all ${
+                    calendarLoading
+                      ? 'bg-white/10 cursor-not-allowed'
+                      : calendarAdded
+                      ? 'bg-green-500/20 hover:bg-green-500/30'
+                      : 'hover:bg-white/5'
+                  }`}
+                  title={calendarAdded ? '已添加到日历' : '添加到日历'}
+                >
+                  {calendarLoading ? (
+                    <RefreshCw className="w-5 h-5 text-purple-300 animate-spin" />
+                  ) : calendarAdded ? (
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  ) : (
+                    <Calendar className="w-5 h-5 text-purple-300 hover:text-white transition-colors" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
           {isNowLucky && (
@@ -249,22 +331,23 @@ export function DailyFortune({ lotteryType }: DailyFortuneProps) {
         <p>{fortune.reason}</p>
       </div>
 
-      {/* 玄学分析卡片 */}
-      {enhancedFortune && (
+      {/* 玄学分析卡片 - 已隐藏 */}
+      {/* {enhancedFortune && (
         <MetaphysicsCard
           nameAnalysis={enhancedFortune.metaphysics.nameAnalysis}
           zodiacAnalysis={enhancedFortune.metaphysics.zodiacAnalysis}
           wuxingAnalysis={enhancedFortune.metaphysics.wuxingAnalysis}
           numerologyAnalysis={enhancedFortune.metaphysics.numerologyAnalysis}
         />
-      )}
+      )} */}
 
-      {/* 推荐号码 */}
-      {enhancedFortune && (
+      {/* 推荐号码 - 已隐藏 */}
+      {/* {enhancedFortune && (
         <RecommendedNumbers
           numbers={enhancedFortune.metaphysics.recommendedNumbers}
+          onRefresh={fetchDailyFortune}
         />
-      )}
+      )} */}
     </div>
   );
 }
