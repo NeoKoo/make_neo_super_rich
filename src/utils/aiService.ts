@@ -26,18 +26,35 @@ interface ZhipuApiResponse {
 }
 
 
+/**
+ * 清除 AI 推荐缓存
+ */
+export function clearAIRecommendationCache(): void {
+  aiAPICache.clearByPrefix('ai_recommendation');
+  console.log('[AI Recommendation] Cache cleared');
+}
+
 export async function getAIRecommendation(
   lotteryType: LotteryType,
   zodiacSign: string,
   birthDate: string,
   userName: string
 ): Promise<AIRecommendationResult> {
+  console.log('[AI Recommendation] Starting request with params:', {
+    lotteryType,
+    zodiacSign,
+    birthDate,
+    userName
+  });
+
   const cacheKey = generateCacheKey('ai_recommendation', {
     lotteryType,
     zodiacSign,
     birthDate,
     userName
   });
+
+  console.log('[AI Recommendation] Cache key:', cacheKey);
 
   const requestTask = async (): Promise<EnhancedLotteryRecommendation | null> => {
     const today = getLocalDateFromBeijing();
@@ -65,6 +82,10 @@ export async function getAIRecommendation(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), AI_CONFIG.timeout);
 
+    console.log('[AI Recommendation] Sending request to:', `${AI_CONFIG.baseUrl}/chat/completions`);
+    console.log('[AI Recommendation] API Key:', AI_CONFIG.apiKey ? `${AI_CONFIG.apiKey.substring(0, 8)}...` : 'NOT SET');
+    console.log('[AI Recommendation] Model:', AI_CONFIG.model);
+
     const response = await fetch(`${AI_CONFIG.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -75,26 +96,32 @@ export async function getAIRecommendation(
         model: AI_CONFIG.model,
         messages: messages,
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 30000
       }),
       signal: controller.signal
     });
+
+    console.log('[AI Recommendation] Response status:', response.status, response.statusText);
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error');
+      console.error('[AI Recommendation] API Error Response:', errorText);
+
       let errorData: ZhipuApiError | null = null;
 
       try {
         errorData = JSON.parse(errorText) as ZhipuApiError;
       } catch (e) {
+        console.error('[AI Recommendation] Failed to parse error response');
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const errorCode = errorData?.error?.code || response.status.toString();
       const errorMessage = errorData?.error?.message || errorText;
 
+      console.error('[AI Recommendation] Error code:', errorCode, 'Error message:', errorMessage);
       throw new APIError(errorCode, errorMessage, response.status);
     }
 

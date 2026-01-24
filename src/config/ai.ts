@@ -1,7 +1,7 @@
 export const AI_CONFIG = {
-  apiKey: import.meta.env.VITE_QWEN_API_KEY || '',
-  baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-  model: 'qwen-plus',
+  apiKey: import.meta.env.VITE_ZHIPU_API_KEY || '',
+  baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+  model: 'glm-4.6',
   timeout: 30000,
   defaultPrompt: `你是一个专业的玄学彩票推荐大师，精通星座、五行、数字命理等玄学理论。请根据用户的姓名、星座、生日和今天的日期，推荐一组幸运号码，并为每个号码提供详细的玄学推荐理由。
 
