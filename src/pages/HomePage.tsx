@@ -19,7 +19,9 @@ import { CoinAnimation } from '../components/animation/CoinAnimation';
 import { DragonBallAnimation } from '../components/animation/DragonBallAnimation';
 import { ShenlongSummon } from '../components/animation/ShenlongSummon';
 import { NoDrawDayAnimation } from '../components/animation/NoDrawDayAnimation';
+import { PlumBlossomCard } from '../components/plumBlossom/PlumBlossomCard';
 import { APP_CONFIG } from '../config/app';
+import { analyzePlumBlossom } from '../utils/plumBlossomCalculator';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ export function HomePage() {
   const [showCoinsAfterExplosion, setShowCoinsAfterExplosion] = useState(false);
   const [showShenlongSummon, setShowShenlongSummon] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [plumBlossomAnalysis, setPlumBlossomAnalysis] = useState<any>(null);
   
   useEffect(() => {
     const birthDate = settings.birthDate;
@@ -52,7 +55,12 @@ export function HomePage() {
     } else {
       setZodiacSign('未知');
     }
-  }, [settings.birthDate]);
+
+    // 计算梅花易数分析
+    const currentDate = getLocalDateFromBeijing();
+    const plumBlossomResult = analyzePlumBlossom(currentDate, lotteryType);
+    setPlumBlossomAnalysis(plumBlossomResult);
+  }, [settings.birthDate, lotteryType]);
  
   const handleRandom = (strategy: RandomStrategy) => {
     try {
@@ -162,6 +170,8 @@ export function HomePage() {
         ) : (
           <>
             <DailyFortune lotteryType={lotteryType} />
+            
+            {plumBlossomAnalysis && <PlumBlossomCard analysis={plumBlossomAnalysis} />}
             
             <WealthGod
               lotteryType={lotteryType}

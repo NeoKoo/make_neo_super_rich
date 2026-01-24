@@ -30,6 +30,7 @@ import {
   generateDynamicLuckyDirection,
   generateDynamicConfidence
 } from './dynamicMetaphysics'
+import { analyzePlumBlossom } from './plumBlossomCalculator'
 
 // 名字分析
 export function analyzeName(name: string): NameAnalysis {
@@ -183,6 +184,7 @@ export function calculateMetaphysicsNumbers(
   const zodiacAnalysis = analyzeZodiac(zodiacSign, currentDate)
   const wuxingAnalysis = analyzeWuxing(nameAnalysis.wuxing, currentDate)
   const numerologyAnalysis = analyzeNumerology(birthDate, currentDate)
+  const plumBlossomAnalysis = analyzePlumBlossom(currentDate, lotteryType)
 
   // 收集所有候选号码和权重
   const numberWeights: Record<number, number> = {}
@@ -205,6 +207,11 @@ export function calculateMetaphysicsNumbers(
   // 数字命理分析权重（20%）
   numerologyAnalysis.luckyNumbers.forEach(num => {
     numberWeights[num] = (numberWeights[num] || 0) + 2
+  })
+
+  // 梅花易数分析权重（25%，新增）
+  plumBlossomAnalysis.luckyNumbers.forEach(num => {
+    numberWeights[num] = (numberWeights[num] || 0) + 2.5
   })
 
   // 根据彩票类型配置
@@ -292,6 +299,7 @@ export function calculateMetaphysicsNumbers(
   reasons.push(`星座${zodiacSign}，元素${zodiacAnalysis.element}，今日运势指数${zodiacAnalysis.todayLuck}`)
   reasons.push(`五行${wuxingAnalysis.personalWuxing}与今日${wuxingAnalysis.todayWuxing}${wuxingAnalysis.relationship}`)
   reasons.push(`生命灵数${numerologyAnalysis.lifePathNumber}，${numerologyAnalysis.meaning}`)
+  reasons.push(`梅花易数：${plumBlossomAnalysis.hexagram.name}，${plumBlossomAnalysis.interpretation}`)
   
   // 添加动态因子影响的理由
   if (dynamicFactor > 1.1) {
