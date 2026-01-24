@@ -148,9 +148,9 @@
       configDiv.innerHTML = `
         <p><strong>API URL:</strong> ${BASE_URL}</p>
         <p><strong>API Key:</strong> ${API_KEY.substring(0, 8)}...</p>
-        <p><strong>Model:</strong> glm-4.6</p>
+        <p><strong>Model:</strong> glm-4-flash</p>
         <p><strong>Max Tokens:</strong> 30000</p>
-        <p><strong>Note:</strong> glm-4.6 是最新模型，功能强大</p>
+        <p><strong>Note:</strong> glm-4-flash 是快速模型，并发数高，适合应对 429 错误</p>
       `;
     }
 
@@ -217,7 +217,7 @@
       try {
         log('发送请求到 AI API...', 'info');
         log(`API URL: ${BASE_URL}/chat/completions`, 'info');
-        log(`Model: glm-4.6`, 'info');
+        log(`Model: glm-4-flash`, 'info');
         log(`Max Tokens: 30000`, 'info');
 
         const startTime = Date.now();
@@ -229,7 +229,7 @@
             'Authorization': `Bearer ${API_KEY}`
           },
           body: JSON.stringify({
-            model: 'glm-4.6',
+            model: 'glm-4-flash',
             messages: messages,
             temperature: 0.7,
             max_tokens: 30000
