@@ -315,6 +315,9 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
 
     console.log('[AI Parse] Red balls:', redBalls);
     console.log('[AI Parse] Blue balls:', blueBalls);
+    console.log('[AI Parse] Number reasons from AI:', jsonData.numberReasons);
+    console.log('[AI Parse] Number reasons type:', typeof jsonData.numberReasons);
+    console.log('[AI Parse] Number reasons is array:', Array.isArray(jsonData.numberReasons));
 
     if (redBalls.length === 0 || blueBalls.length === 0) {
       console.error('[AI Parse Error] No valid balls after filtering');
@@ -342,21 +345,89 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
       }
     };
 
+    console.log('[AI Parse] Initial numberReasons:', result.numberReasons);
+
     // 处理每个号码的理由，确保有默认值
-    result.numberReasons = result.numberReasons.map((reason: any) => ({
-      number: reason.number || 0,
-      type: reason.type || 'red',
-      reasons: {
-        primary: reason.reasons?.primary || '此号码能量强劲',
-        metaphysics: reason.reasons?.metaphysics || '符合玄学原理',
-        zodiac: reason.reasons?.zodiac || '与用户星座相合',
-        wuxing: reason.reasons?.wuxing || '五行属性相生',
-        numerology: reason.reasons?.numerology || '数字命理吉祥',
-        timing: reason.reasons?.timing || '时机恰到好处'
-      },
-      confidence: reason.confidence || 75,
-      luckyElements: reason.luckyElements || ['幸运数字', '吉利符号']
-    }));
+    // 如果 AI 没有返回 numberReasons，则根据红球和蓝球生成默认的理由
+    if (!result.numberReasons || result.numberReasons.length === 0) {
+      console.log('[AI Parse] No numberReasons from AI, generating default reasons');
+      
+      // 为每个红球生成默认理由
+      result.numberReasons = redBalls.map((ball: number) => ({
+        number: ball,
+        type: 'red',
+        reasons: {
+          primary: `红球 ${ball} 是今日幸运号码之一`,
+          metaphysics: '符合五行相生原理',
+          zodiac: '与用户星座相合',
+          wuxing: '五行属性平衡',
+          numerology: '数字能量强劲',
+          timing: '时机恰到好处'
+        },
+        confidence: 75 + Math.floor(Math.random() * 20), // 随机置信度 75-95
+        luckyElements: ['幸运数字', '吉利符号']
+      }));
+
+      // 为每个蓝球生成默认理由
+      blueBalls.forEach((ball: number) => {
+        result.numberReasons.push({
+          number: ball,
+          type: 'blue',
+          reasons: {
+            primary: `蓝球 ${ball} 是今日幸运号码之一`,
+            metaphysics: '符合五行相生原理',
+            zodiac: '与用户星座相合',
+            wuxing: '五行属性平衡',
+            numerology: '数字能量强劲',
+            timing: '时机恰到好处'
+          },
+          confidence: 75 + Math.floor(Math.random() * 20), // 随机置信度 75-95
+          luckyElements: ['幸运数字', '吉利符号']
+        });
+      });
+    } else {
+      // 处理 AI 返回的 numberReasons
+      result.numberReasons = result.numberReasons.map((reason: any, mapIndex: number) => {
+        // 如果 reason 是字符串，则尝试解析
+        if (typeof reason === 'string') {
+          console.log('[AI Parse] Reason is string, trying to parse:', reason);
+          try {
+            reason = JSON.parse(reason);
+          } catch (e) {
+            console.error('[AI Parse] Failed to parse reason string:', e);
+          }
+        }
+
+        // 确保有 number 字段
+        let ballNumber = reason.number;
+        if (ballNumber === undefined || ballNumber === null) {
+          // 如果没有 number 字段，尝试从红球或蓝球数组中获取
+          if (mapIndex < redBalls.length) {
+            ballNumber = redBalls[mapIndex];
+          } else {
+            ballNumber = blueBalls[mapIndex - redBalls.length];
+          }
+          console.log('[AI Parse] No number field, using ball from array:', ballNumber);
+        }
+
+        return {
+          number: ballNumber || 0,
+          type: reason.type || (mapIndex < redBalls.length ? 'red' : 'blue'),
+          reasons: {
+            primary: reason.reasons?.primary || '此号码能量强劲',
+            metaphysics: reason.reasons?.metaphysics || '符合玄学原理',
+            zodiac: reason.reasons?.zodiac || '与用户星座相合',
+            wuxing: reason.reasons?.wuxing || '五行属性相生',
+            numerology: reason.reasons?.numerology || '数字命理吉祥',
+            timing: reason.reasons?.timing || '时机恰到好处'
+          },
+          confidence: reason.confidence || 75,
+          luckyElements: reason.luckyElements || ['幸运数字', '吉利符号']
+        };
+      });
+    }
+
+    console.log('[AI Parse] Final numberReasons:', result.numberReasons);
 
     return result;
   } catch (error) {
