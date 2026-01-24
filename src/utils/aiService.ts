@@ -90,9 +90,7 @@ export async function getAIRecommendation(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${AI_CONFIG.apiKey}`,
-        'HTTP-Referer': typeof window !== 'undefined' ? window.location.href : 'https://lottery-picker.local',
-        'X-Title': 'Lottery Picker'
+        'Authorization': `Bearer ${AI_CONFIG.apiKey}`
       },
       body: JSON.stringify({
         model: AI_CONFIG.model,
