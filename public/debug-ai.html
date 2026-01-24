@@ -124,8 +124,8 @@
   </div>
 
   <script>
-    const API_KEY = '991713baffb64af1bd3f9c700442afff.0jC7HDUAwjSpNMMl';
-    const BASE_URL = 'https://open.bigmodel.cn/api/paas/v4';
+    const API_KEY = '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';
+    const BASE_URL = 'https://openrouter.ai/api/v1';
 
     function log(message, type = 'info') {
       const logDiv = document.getElementById('log');
@@ -148,7 +148,7 @@
       configDiv.innerHTML = `
         <p><strong>API URL:</strong> ${BASE_URL}</p>
         <p><strong>API Key:</strong> ${API_KEY.substring(0, 8)}...</p>
-        <p><strong>Model:</strong> glm-4.6</p>
+        <p><strong>Model:</strong> google/gemini-3.0-pro</p>
         <p><strong>Max Tokens:</strong> 30000</p>
       `;
     }
@@ -216,7 +216,7 @@
       try {
         log('发送请求到 AI API...', 'info');
         log(`API URL: ${BASE_URL}/chat/completions`, 'info');
-        log(`Model: glm-4.6`, 'info');
+        log(`Model: google/gemini-3.0-pro`, 'info');
         log(`Max Tokens: 30000`, 'info');
 
         const startTime = Date.now();
@@ -225,10 +225,12 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Authorization': `Bearer ${API_KEY}`,
+            'HTTP-Referer': window.location.href,
+            'X-Title': '彩票选号助手'
           },
           body: JSON.stringify({
-            model: 'glm-4.6',
+            model: 'google/gemini-3.0-pro',
             messages: messages,
             temperature: 0.7,
             max_tokens: 30000
