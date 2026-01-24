@@ -8,6 +8,7 @@ interface NumberBallProps {
   onClick: () => void;
   disabled?: boolean;
   matched?: boolean;
+  highlighted?: boolean;
   size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
@@ -18,6 +19,7 @@ export function NumberBall({
   onClick,
   disabled = false,
   matched = false,
+  highlighted = false,
   size = 'md'
 }: NumberBallProps) {
   const luckyItem = color === 'red' ? LUCKY_RED_ITEMS[number] : LUCKY_BLUE_ITEMS[number];
@@ -67,6 +69,7 @@ export function NumberBall({
         disabled:opacity-40 disabled:cursor-not-allowed
         ${selected ? `ring-2 ${ringColor} ring-offset-2 ring-offset-transparent scale-105` : 'opacity-85 hover:opacity-100'}
         ${matched ? 'ring-4 ring-yellow-400 shadow-yellow-500/50 scale-110' : ''}
+        ${highlighted ? 'ring-4 ring-purple-400 shadow-purple-500/50 scale-105 animate-pulse' : ''}
         animate-pop cursor-pointer
         overflow-hidden
       `}

@@ -324,18 +324,35 @@ export async function getEnhancedDailyFortune(
       weekday: 'long'
     });
 
-    // 解析生日
-    const [birthMonth, birthDay] = birthDate.split('-').map(Number);
-    const birthDateObj = new Date(2000, birthMonth - 1, birthDay);
+    // 解析生日（添加错误处理）
+    let birthDateObj: Date
+    try {
+      const [birthMonth, birthDay] = birthDate.split('-').map(Number)
+      if (isNaN(birthMonth) || isNaN(birthDay) || birthMonth < 1 || birthMonth > 12 || birthDay < 1 || birthDay > 31) {
+        throw new Error('Invalid birth date format')
+      }
+      birthDateObj = new Date(2000, birthMonth - 1, birthDay)
+    } catch (error) {
+      console.error('[Enhanced Fortune Error] Invalid birth date:', error)
+      // 使用默认生日
+      birthDateObj = new Date(2000, 0, 1)
+    }
 
     // 使用本地玄学计算（不依赖AI）
-    const metaphysics = analyzeMetaphysics(name, birthDateObj, today);
-    const recommendedNumbers = calculateMetaphysicsNumbers(
-      name,
-      birthDateObj,
-      today,
-      lotteryType
-    );
+    let metaphysics
+    let recommendedNumbers
+    try {
+      metaphysics = analyzeMetaphysics(name, birthDateObj, today)
+      recommendedNumbers = calculateMetaphysicsNumbers(
+        name,
+        birthDateObj,
+        today,
+        lotteryType
+      )
+    } catch (error) {
+      console.error('[Enhanced Fortune Error] Metaphysics calculation failed:', error)
+      throw new Error('玄学计算失败')
+    }
 
     // 使用AI获取祝福语和幸运时间
     const prompt = `作为命理专家，请为用户提供今日运势祝福和幸运购彩时间，并严格按照以下JSON格式输出：

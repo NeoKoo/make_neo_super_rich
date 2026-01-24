@@ -1,17 +1,61 @@
+import { memo, useState, useEffect } from 'react'
 import type { RecommendedNumbers } from '../../types/fortune'
 import { NumberBall } from '../lottery/NumberBall'
-import { ChevronDown, ChevronUp, Sparkles, Copy, Check } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, Sparkles, Copy, Check, RefreshCw, Shuffle } from 'lucide-react'
 import { useToast } from '../../hooks/useToast'
+import { getCombinedDynamicFactor } from '../../utils/dynamicMetaphysics'
 
 interface RecommendedNumbersProps {
   numbers: RecommendedNumbers
 }
 
-export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
+function RecommendedNumbers({ numbers, onRefresh }: RecommendedNumbersProps & { onRefresh?: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [animating, setAnimating] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [dynamicFactor, setDynamicFactor] = useState(1)
+  const [highlightedBalls, setHighlightedBalls] = useState<number[]>([])
   const { addToast } = useToast()
+
+  // 动态更新因子和效果
+  useEffect(() => {
+    const updateDynamicFactor = () => {
+      setDynamicFactor(getCombinedDynamicFactor())
+      
+      // 随机高亮一些球
+      const redHighlights: number[] = []
+      const blueHighlights: number[] = []
+      
+      // 随机选择2-3个红球高亮
+      const redCount = Math.floor(Math.random() * 2) + 2
+      for (let i = 0; i < redCount; i++) {
+        const randomIndex = Math.floor(Math.random() * numbers.redBalls.length)
+        if (!redHighlights.includes(numbers.redBalls[randomIndex])) {
+          redHighlights.push(numbers.redBalls[randomIndex])
+        }
+      }
+      
+      // 随机选择1个蓝球高亮
+      if (numbers.blueBalls.length > 0) {
+        const randomIndex = Math.floor(Math.random() * numbers.blueBalls.length)
+        blueHighlights.push(numbers.blueBalls[randomIndex])
+      }
+      
+      setHighlightedBalls([...redHighlights, ...blueHighlights])
+    }
+    
+    updateDynamicFactor()
+    const interval = setInterval(updateDynamicFactor, 30000) // 每30秒更新一次
+    
+    return () => clearInterval(interval)
+  }, [numbers.redBalls, numbers.blueBalls])
+
+  const handleToggle = () => {
+    setAnimating(true)
+    setExpanded(!expanded)
+    setTimeout(() => setAnimating(false), 300)
+  }
 
   const handleCopy = async () => {
     const text = `推荐号码：\n红球：${numbers.redBalls.join(' ')}\n蓝球：${numbers.blueBalls.join(' ')}\n置信度：${numbers.confidence}%`
@@ -22,6 +66,20 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       addToast('复制失败，请手动复制', 'error')
+    }
+  }
+
+  const handleRefreshNumbers = async () => {
+    if (onRefresh) {
+      setRefreshing(true)
+      try {
+        await onRefresh()
+        addToast('推荐号码已刷新', 'success')
+      } catch (error) {
+        addToast('刷新失败，请稍后重试', 'error')
+      } finally {
+        setRefreshing(false)
+      }
     }
   }
 
@@ -41,8 +99,8 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
     <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 rounded-2xl border border-amber-400/20 overflow-hidden relative z-0">
       {/* Header */}
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+        onClick={handleToggle}
+        className={`w-full p-4 flex items-center justify-between hover:bg-white/5 transition-all duration-300 ${animating ? 'scale-[0.98]' : 'scale-100'}`}
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-500/30 rounded-lg">
@@ -53,16 +111,36 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
             <div className="text-xs text-amber-300/80">基于名字、星座、五行、数字命理综合计算</div>
           </div>
         </div>
-        {expanded ? (
-          <ChevronUp className="w-5 h-5 text-amber-300" />
-        ) : (
+        <div className={`transition-transform duration-300 ${expanded ? 'rotate-180' : 'rotate-0'}`}>
           <ChevronDown className="w-5 h-5 text-amber-300" />
-        )}
+        </div>
       </button>
 
       {/* Content */}
       {expanded && (
-        <div className="p-4 space-y-4 border-t border-amber-400/20">
+        <div className="p-4 space-y-4 border-t border-amber-400/20 animate-[fadeIn_0.3s_ease-out]">
+          {/* 动态因子指示器 */}
+          <div className="bg-white/5 rounded-xl p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-amber-200/80">玄学能量指数</span>
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-bold text-purple-300">
+                  {Math.round(dynamicFactor * 100)}%
+                </div>
+                <div className={`w-2 h-2 rounded-full ${
+                  dynamicFactor > 1.1 ? 'bg-green-400' :
+                  dynamicFactor > 0.9 ? 'bg-yellow-400' :
+                  'bg-red-400'
+                }`} />
+              </div>
+            </div>
+            <div className="text-xs text-amber-200/60">
+              {dynamicFactor > 1.1 ? '玄学能量高涨，推荐号码可信度提升' :
+               dynamicFactor > 0.9 ? '玄学能量平稳，推荐号码保持稳定' :
+               '玄学能量偏低，建议谨慎参考'}
+            </div>
+          </div>
+
           {/* 置信度 */}
           <div className="bg-white/5 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
@@ -92,22 +170,44 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
           <div className="bg-white/5 rounded-xl p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm font-semibold text-white">推荐号码</div>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/30 hover:bg-amber-500/40 rounded-lg transition-colors"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-green-400">已复制</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-amber-300" />
-                    <span className="text-sm text-amber-300">复制</span>
-                  </>
+              <div className="flex items-center gap-2">
+                {onRefresh && (
+                  <button
+                    onClick={handleRefreshNumbers}
+                    disabled={refreshing}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/30 hover:bg-purple-500/40 rounded-lg transition-colors disabled:opacity-50"
+                    title="刷新推荐号码"
+                  >
+                    {refreshing ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 text-purple-300 animate-spin" />
+                        <span className="text-sm text-purple-300">刷新中</span>
+                      </>
+                    ) : (
+                      <>
+                        <Shuffle className="w-4 h-4 text-purple-300" />
+                        <span className="text-sm text-purple-300">刷新</span>
+                      </>
+                    )}
+                  </button>
                 )}
-              </button>
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/30 hover:bg-amber-500/40 rounded-lg transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-green-400">已复制</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-amber-300" />
+                      <span className="text-sm text-amber-300">复制</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* 红球 */}
@@ -122,6 +222,7 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
                     selected={false}
                     onClick={() => {}}
                     size="lg"
+                    highlighted={highlightedBalls.includes(num)}
                   />
                 ))}
               </div>
@@ -169,3 +270,5 @@ export function RecommendedNumbers({ numbers }: RecommendedNumbersProps) {
     </div>
   )
 }
+
+export default memo(RecommendedNumbers)

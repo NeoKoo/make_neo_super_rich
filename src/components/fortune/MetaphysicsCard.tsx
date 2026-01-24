@@ -1,5 +1,6 @@
+import { memo } from 'react'
 import { NameAnalysis, ZodiacAnalysis, WuxingAnalysis, NumerologyAnalysis } from '../../types/fortune'
-import { ChevronDown, ChevronUp, Sparkles, Star, Flame, Droplets, Wind, Leaf, Mountain } from 'lucide-react'
+import { ChevronDown, Sparkles, Star, Flame, Droplets, Wind, Leaf, Mountain } from 'lucide-react'
 import { useState } from 'react'
 
 interface MetaphysicsCardProps {
@@ -9,13 +10,20 @@ interface MetaphysicsCardProps {
   numerologyAnalysis: NumerologyAnalysis
 }
 
-export function MetaphysicsCard({
+function MetaphysicsCard({
   nameAnalysis,
   zodiacAnalysis,
   wuxingAnalysis,
   numerologyAnalysis
 }: MetaphysicsCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [animating, setAnimating] = useState(false)
+
+  const handleToggle = () => {
+    setAnimating(true)
+    setExpanded(!expanded)
+    setTimeout(() => setAnimating(false), 300)
+  }
 
   const getWuxingIcon = (wuxing: string) => {
     switch (wuxing) {
@@ -72,8 +80,8 @@ export function MetaphysicsCard({
     <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-400/20 overflow-hidden">
       {/* Header */}
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+        onClick={handleToggle}
+        className={`w-full p-4 flex items-center justify-between hover:bg-white/5 transition-all duration-300 ${animating ? 'scale-[0.98]' : 'scale-100'}`}
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-purple-500/30 rounded-lg">
@@ -84,16 +92,14 @@ export function MetaphysicsCard({
             <div className="text-xs text-purple-300/80">基于名字、星座、五行、数字命理</div>
           </div>
         </div>
-        {expanded ? (
-          <ChevronUp className="w-5 h-5 text-purple-300" />
-        ) : (
+        <div className={`transition-transform duration-300 ${expanded ? 'rotate-180' : 'rotate-0'}`}>
           <ChevronDown className="w-5 h-5 text-purple-300" />
-        )}
+        </div>
       </button>
 
       {/* Content */}
       {expanded && (
-        <div className="p-4 space-y-4 border-t border-purple-400/20">
+        <div className="p-4 space-y-4 border-t border-purple-400/20 animate-[fadeIn_0.3s_ease-out]">
           {/* 名字分析 */}
           <div className="bg-white/5 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
@@ -296,3 +302,5 @@ export function MetaphysicsCard({
     </div>
   )
 }
+
+export default memo(MetaphysicsCard)

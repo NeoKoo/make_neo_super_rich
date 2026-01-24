@@ -1,4 +1,4 @@
-import { getLocalDateFromBeijing } from '../utils/dateUtils';
+import { getLocalDateFromBeijing, isFriday } from '../utils/dateUtils';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLotteryConfig } from '../hooks/useLotteryConfig';
@@ -18,6 +18,7 @@ import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
 import { DragonBallAnimation } from '../components/animation/DragonBallAnimation';
 import { ShenlongSummon } from '../components/animation/ShenlongSummon';
+import { NoDrawDayAnimation } from '../components/animation/NoDrawDayAnimation';
 import { APP_CONFIG } from '../config/app';
 
 export function HomePage() {
@@ -32,6 +33,9 @@ export function HomePage() {
     'lottery_user_settings',
     APP_CONFIG.defaultSettings
   );
+  
+  // 检查今天是否为星期五
+  const todayIsFriday = isFriday();
   
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [zodiacSign, setZodiacSign] = useState('');
@@ -153,70 +157,80 @@ export function HomePage() {
       <div className="px-4 pt-4 pb-48">
         <LotteryTypeBadge type={lotteryType} />
         
-        <DailyFortune lotteryType={lotteryType} />
-        
-        <WealthGod
-          lotteryType={lotteryType}
-          zodiacSign={zodiacSign}
-          birthDate={settings.birthDate}
-          userName={settings.name || '高创杰'}
-          onSelectNumbers={handleAIRecommend}
-          onSaveAIRecommendation={handleSaveAIRecommendation}
-        />
-        
-        <NumberGrid
-          title="红球区"
-          min={config.redBalls.min}
-          max={config.redBalls.max}
-          selected={redBalls}
-          onSelect={toggleRedBall}
-          color="red"
-          matched={[]}
-        />
-        
-        <NumberGrid
-          title="蓝球区"
-          min={config.blueBalls.min}
-          max={config.blueBalls.max}
-          selected={blueBalls}
-          onSelect={toggleBlueBall}
-          color="blue"
-          matched={[]}
-          size="sm"
-        />
+        {todayIsFriday ? (
+          <NoDrawDayAnimation />
+        ) : (
+          <>
+            <DailyFortune lotteryType={lotteryType} />
+            
+            <WealthGod
+              lotteryType={lotteryType}
+              zodiacSign={zodiacSign}
+              birthDate={settings.birthDate}
+              userName={settings.name || '高创杰'}
+              onSelectNumbers={handleAIRecommend}
+              onSaveAIRecommendation={handleSaveAIRecommendation}
+            />
+            
+            <NumberGrid
+              title="红球区"
+              min={config.redBalls.min}
+              max={config.redBalls.max}
+              selected={redBalls}
+              onSelect={toggleRedBall}
+              color="red"
+              matched={[]}
+            />
+            
+            <NumberGrid
+              title="蓝球区"
+              min={config.blueBalls.min}
+              max={config.blueBalls.max}
+              selected={blueBalls}
+              onSelect={toggleBlueBall}
+              color="blue"
+              matched={[]}
+              size="sm"
+            />
+          </>
+        )}
       </div>
 
-      <RandomStrategyModal
-        isOpen={showStrategyModal}
-        onClose={() => setShowStrategyModal(false)}
-        onSelectStrategy={handleRandom}
-      />
+      {!todayIsFriday && (
+        <>
+          <RandomStrategyModal
+            isOpen={showStrategyModal}
+            onClose={() => setShowStrategyModal(false)}
+            onSelectStrategy={handleRandom}
+          />
 
-      <ActionButtons
-        redBalls={redBalls}
-        blueBalls={blueBalls}
-        onClear={clearSelection}
-        onRandom={() => setShowStrategyModal(true)}
-        onSave={handleSave}
-        isComplete={isComplete}
-        lotteryType={lotteryType}
-        loading={isSaving}
-      />
+          <ActionButtons
+            redBalls={redBalls}
+            blueBalls={blueBalls}
+            onClear={clearSelection}
+            onRandom={() => setShowStrategyModal(true)}
+            onSave={handleSave}
+            isComplete={isComplete}
+            lotteryType={lotteryType}
+            loading={isSaving}
+          />
 
-      <DragonBallAnimation
-        trigger={dragonBallTrigger}
-      />
+          <DragonBallAnimation
+            trigger={dragonBallTrigger}
+          />
 
-      <CoinAnimation
-        trigger={showCoinsAfterExplosion}
-        type="large"
-        onComplete={handleCelebrationComplete}
-      />
+          <CoinAnimation
+            trigger={showCoinsAfterExplosion}
+            type="large"
+            onComplete={handleCelebrationComplete}
+          />
 
-      <ShenlongSummon
-        trigger={showShenlongSummon}
-        onComplete={handleShenlongComplete}
-      />
+          <ShenlongSummon
+            trigger={showShenlongSummon}
+            onComplete={handleShenlongComplete}
+          />
+        </>
+      )}
     </div>
   );
 }

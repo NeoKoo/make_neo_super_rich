@@ -1,76 +1,32 @@
 /**
- * 获取北京时间（东八区）
+ * 获取北京时间日期
  */
-export function getBeijingDate(): Date {
+export function getLocalDateFromBeijing(): Date {
   const now = new Date();
-  // UTC时间 + 8小时 = 北京时间
-  return new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (8 * 3600000));
+  // 直接使用当前时间，因为服务器已经在北京时区
+  return now;
 }
 
 /**
- * 获取当前北京时间对应的本地时间Date对象（用于后续操作）
- * 这样可以使用getDay()等方法，但基于北京时间
+ * 检查今天是否为星期五
  */
-export function getLocalDateFromBeijing(): Date {
-  const beijingTime = getBeijingDate();
-  // 创建一个新的Date对象，其值就是北京时间的时间戳
-  return new Date(beijingTime.getTime());
+export function isFriday(): boolean {
+  const beijingTime = getLocalDateFromBeijing();
+  return beijingTime.getDay() === 5; // 5 表示星期五
 }
 
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-}
-
-export function formatDateWithWeekday(date: Date): string {
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long'
-  });
-}
-
-export function formatTime(date: Date): string {
-  return date.toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-export function formatDateTime(date: Date): string {
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-export function getDaysUntil(targetDate: Date): number {
-  const now = getLocalDateFromBeijing();
-  const diff = targetDate.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
-
-export function getHoursUntil(targetDate: Date): number {
-  const now = getLocalDateFromBeijing();
-  const diff = targetDate.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60));
-}
-
-export function getMinutesUntil(targetDate: Date): number {
-  const now = getLocalDateFromBeijing();
-  const diff = targetDate.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60));
-}
-
-export function getSecondsUntil(targetDate: Date): number {
-  const now = getLocalDateFromBeijing();
-  const diff = targetDate.getTime() - now.getTime();
-  return Math.ceil(diff / 1000);
+/**
+ * 检查今天是否为开奖日
+ */
+export function isDrawDay(lotteryType: '双色球' | '大乐透'): boolean {
+  const beijingTime = getLocalDateFromBeijing();
+  const currentDay = beijingTime.getDay(); // 0=周日, 1=周一, ...
+  
+  // 从lotterySchedule.ts获取开奖日配置
+  const drawDays = {
+    '双色球': [2, 5, 7], // 周二、周四、周日开奖
+    '大乐透': [1, 3, 6]  // 周一、周三、周六开奖
+  };
+  
+  return drawDays[lotteryType].includes(currentDay);
 }

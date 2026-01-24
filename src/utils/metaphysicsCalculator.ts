@@ -22,6 +22,14 @@ import {
 } from '../constants/metaphysics'
 import { calculateLifePathNumber, calculateDailyNumber } from '../constants/numberColorMap'
 import { getZodiacSign } from '../constants/zodiacColors'
+import {
+  getCombinedDynamicFactor,
+  adjustLuckyNumbers,
+  generateDynamicAdvice,
+  generateDynamicLuckyColor,
+  generateDynamicLuckyDirection,
+  generateDynamicConfidence
+} from './dynamicMetaphysics'
 
 // 名字分析
 export function analyzeName(name: string): NameAnalysis {
@@ -61,23 +69,27 @@ export function analyzeName(name: string): NameAnalysis {
 // 星座深度分析
 export function analyzeZodiac(zodiacSign: string, currentDate: Date): ZodiacAnalysis {
   const element = ZODIAC_ELEMENTS[zodiacSign]
-  const luckyNumbers = ZODIAC_LUCKY_NUMBERS[zodiacSign]
-  const luckyDirection = ZODIAC_DIRECTIONS[zodiacSign]
+  const baseLuckyNumbers = ZODIAC_LUCKY_NUMBERS[zodiacSign]
+  const baseLuckyDirection = ZODIAC_DIRECTIONS[zodiacSign]
 
-  // 计算今日运势指数（1-10）
+  // 获取动态因子
+  const dynamicFactor = getCombinedDynamicFactor()
+
+  // 计算今日运势指数（1-10），添加动态因子影响
   const day = currentDate.getDate()
   const month = currentDate.getMonth() + 1
   const baseLuck = ((day + month) % 5) + 5
-  const todayLuck = Math.min(10, Math.max(1, baseLuck))
+  const adjustedLuck = baseLuck * dynamicFactor
+  const todayLuck = Math.min(10, Math.max(1, Math.round(adjustedLuck)))
 
-  // 幸运色基于星座元素
-  const elementColors: Record<string, string> = {
-    火: '#E74C3C',
-    土: '#8D6E63',
-    风: '#3498DB',
-    水: '#1976D2'
-  }
-  const luckyColor = elementColors[element]
+  // 动态调整幸运数字
+  const luckyNumbers = adjustLuckyNumbers(baseLuckyNumbers, dynamicFactor)
+
+  // 动态生成幸运色
+  const luckyColor = generateDynamicLuckyColor(element as any)
+
+  // 动态生成幸运方位
+  const luckyDirection = generateDynamicLuckyDirection(baseLuckyDirection)
 
   // 基于运势指数的建议
   let advice = ''
@@ -106,21 +118,30 @@ export function analyzeZodiac(zodiacSign: string, currentDate: Date): ZodiacAnal
 export function analyzeWuxing(personalWuxing: WuxingType, currentDate: Date): WuxingAnalysis {
   const todayWuxing = calculateTodayWuxing(currentDate)
   const relationship = getWuxingRelationship(personalWuxing, todayWuxing)
-  const luckyNumbers = WUXING_LUCKY_NUMBERS[personalWuxing]
+  const baseLuckyNumbers = WUXING_LUCKY_NUMBERS[personalWuxing]
+
+  // 获取动态因子
+  const dynamicFactor = getCombinedDynamicFactor()
+
+  // 动态调整幸运数字
+  const luckyNumbers = adjustLuckyNumbers(baseLuckyNumbers, dynamicFactor)
 
   // 基于五行关系的建议
-  let advice = ''
+  let baseAdvice = ''
   switch (relationship) {
     case '相生':
-      advice = `今日${personalWuxing}与今日五行${todayWuxing}相生，运势大吉，适合积极行动！`
+      baseAdvice = `今日${personalWuxing}与今日五行${todayWuxing}相生，运势大吉，适合积极行动！`
       break
     case '相克':
-      advice = `今日${personalWuxing}与今日五行${todayWuxing}相克，需要谨慎行事，避免冲突。`
+      baseAdvice = `今日${personalWuxing}与今日五行${todayWuxing}相克，需要谨慎行事，避免冲突。`
       break
     case '相同':
-      advice = `今日五行与您相同，运势平稳，适合稳步前进。`
+      baseAdvice = `今日五行与您相同，运势平稳，适合稳步前进。`
       break
   }
+
+  // 使用动态建议生成函数
+  const advice = generateDynamicAdvice(baseAdvice, personalWuxing)
 
   return {
     personalWuxing,
@@ -203,12 +224,15 @@ export function calculateMetaphysicsNumbers(
     .sort((a, b) => b[1] - a[1])
     .map(([num]) => parseInt(num))
 
-  // 如果候选号码不足，补充随机号码
-  while (redCandidates.length < redBallCount * 2) {
+  // 如果候选号码不足，补充随机号码（添加最大尝试次数限制）
+  let attempts = 0
+  const maxAttempts = 100
+  while (redCandidates.length < redBallCount * 2 && attempts < maxAttempts) {
     const randomNum = Math.floor(Math.random() * (redBallMax - redBallMin + 1)) + redBallMin
     if (!redCandidates.includes(randomNum)) {
       redCandidates.push(randomNum)
     }
+    attempts++
   }
 
   // 选择前6个作为推荐
@@ -223,21 +247,44 @@ export function calculateMetaphysicsNumbers(
     .sort((a, b) => b[1] - a[1])
     .map(([num]) => parseInt(num))
 
-  // 如果候选号码不足，补充随机号码
-  while (blueCandidates.length < blueBallCount * 2) {
+  // 如果候选号码不足，补充随机号码（添加最大尝试次数限制）
+  attempts = 0
+  while (blueCandidates.length < blueBallCount * 2 && attempts < maxAttempts) {
     const randomNum = Math.floor(Math.random() * (blueBallMax - blueBallMin + 1)) + blueBallMin
     if (!blueCandidates.includes(randomNum)) {
       blueCandidates.push(randomNum)
     }
+    attempts++
   }
 
   // 选择前1-2个作为推荐
   const blueBalls = blueCandidates.slice(0, blueBallCount).sort((a, b) => a - b)
 
-  // 计算置信度（基于权重分布）
-  const maxWeight = Math.max(...Object.values(numberWeights))
-  const avgWeight = Object.values(numberWeights).reduce((a, b) => a + b, 0) / Object.keys(numberWeights).length
-  const confidence = Math.min(95, Math.max(60, Math.round((avgWeight / maxWeight) * 100)))
+  // 计算置信度（基于权重分布和多个因素）
+  const weights = Object.values(numberWeights)
+  const maxWeight = weights.length > 0 ? Math.max(...weights) : 1
+  const avgWeight = weights.length > 0
+    ? weights.reduce((a, b) => a + b, 0) / weights.length
+    : 0
+
+  // 基础置信度（基于权重分布）
+  let confidence = weights.length > 0
+    ? Math.round((avgWeight / maxWeight) * 100)
+    : 50 // 默认置信度
+
+  // 调整置信度（基于候选号码数量）
+  const candidateCount = weights.length
+  if (candidateCount < 10) {
+    confidence -= 10
+  } else if (candidateCount >= 20) {
+    confidence += 5
+  }
+
+  // 获取动态因子
+  const dynamicFactor = getCombinedDynamicFactor()
+  
+  // 使用动态置信度生成函数
+  confidence = generateDynamicConfidence(confidence, dynamicFactor)
 
   // 生成推荐理由
   const reasons: string[] = []
@@ -245,6 +292,15 @@ export function calculateMetaphysicsNumbers(
   reasons.push(`星座${zodiacSign}，元素${zodiacAnalysis.element}，今日运势指数${zodiacAnalysis.todayLuck}`)
   reasons.push(`五行${wuxingAnalysis.personalWuxing}与今日${wuxingAnalysis.todayWuxing}${wuxingAnalysis.relationship}`)
   reasons.push(`生命灵数${numerologyAnalysis.lifePathNumber}，${numerologyAnalysis.meaning}`)
+  
+  // 添加动态因子影响的理由
+  if (dynamicFactor > 1.1) {
+    reasons.push('今日天时地利，各项玄学指标均处于高位')
+  } else if (dynamicFactor < 0.9) {
+    reasons.push('今日玄学能量偏弱，建议谨慎行事')
+  } else {
+    reasons.push('今日玄学能量平稳，适合常规操作')
+  }
 
   return {
     redBalls,

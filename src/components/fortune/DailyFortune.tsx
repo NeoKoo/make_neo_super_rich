@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getDailyFortune, isLuckyTime } from '../../utils/fortuneService';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useToast } from '../../hooks/useToast';
-import { APP_CONFIG } from '../../config/app';
-import { LotteryType } from '../../types/lottery';
-import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle, Bell, BellOff, Calendar, CheckCircle } from 'lucide-react';
-import { SkeletonFortune } from '../common/Skeleton';
-import { addReminder, getReminders, removeReminder } from '../../utils/notificationManager';
-import { addCalendarEvent } from '../../utils/calendarUtils';
+import { useState, useEffect, useCallback } from 'react'
+import { getDailyFortune, isLuckyTime } from '@/utils/fortuneService'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useToast } from '@/hooks/useToast'
+import { APP_CONFIG } from '@/config/app'
+import { LotteryType } from '@/types/lottery'
+import { Sparkles, Clock, RefreshCw, Star, BookOpen, Sparkle, Bell, BellOff, Calendar, CheckCircle } from 'lucide-react'
+import { SkeletonFortune } from '../common/Skeleton'
+import { addReminder, getReminders, removeReminder } from '@/utils/notificationManager'
+import { addCalendarEvent } from '@/utils/calendarUtils'
 
 interface DailyFortuneProps {
   lotteryType: LotteryType;
