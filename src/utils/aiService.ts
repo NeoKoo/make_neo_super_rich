@@ -34,6 +34,49 @@ export function clearAIRecommendationCache(): void {
   console.log('[AI Recommendation] Cache cleared');
 }
 
+/**
+ * 带重试的 fetch 请求
+ */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+  retryDelay = 2000
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[AI Recommendation] Attempt ${attempt}/${maxRetries}`);
+      const response = await fetch(url, options);
+      
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : retryDelay * attempt;
+        
+        console.log(`[AI Recommendation] Rate limited (429), retrying after ${delay}ms`);
+        lastError = new Error(`Rate limited (429), retrying after ${delay}ms`);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      }
+      
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`[AI Recommendation] Attempt ${attempt} failed:`, error);
+      
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+      }
+    }
+  }
+
+  throw lastError || new Error('Max retries exceeded');
+}
+
 export async function getAIRecommendation(
   lotteryType: LotteryType,
   zodiacSign: string,
@@ -86,20 +129,25 @@ export async function getAIRecommendation(
     console.log('[AI Recommendation] API Key:', AI_CONFIG.apiKey ? `${AI_CONFIG.apiKey.substring(0, 8)}...` : 'NOT SET');
     console.log('[AI Recommendation] Model:', AI_CONFIG.model);
 
-    const response = await fetch(`${AI_CONFIG.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${AI_CONFIG.apiKey}`
+    const response = await fetchWithRetry(
+      `${AI_CONFIG.baseUrl}/chat/completions`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${AI_CONFIG.apiKey}`
+        },
+        body: JSON.stringify({
+          model: AI_CONFIG.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 30000
+        }),
+        signal: controller.signal
       },
-      body: JSON.stringify({
-        model: AI_CONFIG.model,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 30000
-      }),
-      signal: controller.signal
-    });
+      3, // 最多重试 3 次
+      2000 // 初始延迟 2 秒
+    );
 
     console.log('[AI Recommendation] Response status:', response.status, response.statusText);
 
@@ -204,7 +252,7 @@ function getFriendlyErrorMessage(error: APIError): string {
     '400': '请求参数错误',
     '401': 'API密钥无效或已过期',
     '403': '权限不足',
-    '429': '请求过于频繁，请稍后再试',
+    '429': '请求过于频繁（429），请等待几秒后重试',
     '500': '服务器错误，请稍后再试',
     '503': '服务暂时不可用，请稍后再试'
   };
