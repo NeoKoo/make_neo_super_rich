@@ -1,6 +1,6 @@
 import { CopyButton } from '../common/CopyButton';
 import { Button } from '../common/Button';
-import { Trash2, Save, Dices } from 'lucide-react';
+import { Trash2, Save, Dices, Filter } from 'lucide-react';
 import { NumberBall } from './NumberBall';
 import { soundManager } from '../../utils/soundManager';
 
@@ -10,6 +10,7 @@ interface ActionButtonsProps {
   onClear: () => void;
   onRandom: () => void;
   onSave: () => void;
+  onReverse?: () => void;
   isComplete: boolean;
   lotteryType: string;
   loading?: boolean;
@@ -21,6 +22,7 @@ export function ActionButtons({
   onClear,
   onRandom,
   onSave,
+  onReverse,
   isComplete,
   lotteryType,
   loading = false
@@ -97,6 +99,21 @@ export function ActionButtons({
                 <Dices className="w-3.5 h-3.5" />
                 <span>随机</span>
               </Button>
+
+              {onReverse && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    soundManager.playStrategySelect();
+                    onReverse();
+                  }}
+                  loading={loading}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>反选</span>
+                </Button>
+              )}
 
               <Button
                 variant={isComplete ? 'primary' : 'secondary'}

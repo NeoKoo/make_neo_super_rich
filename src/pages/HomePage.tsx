@@ -13,6 +13,7 @@ import { LotteryTypeBadge } from '../components/lottery/LotteryTypeBadge';
 import { NumberGrid } from '../components/lottery/NumberGrid';
 import { RandomStrategyModal } from '../components/lottery/RandomStrategyModal';
 import { ActionButtons } from '../components/lottery/ActionButtons';
+import { ReverseSelectionModal } from '../components/reverseSelection/ReverseSelectionModal';
 import { WealthGod } from '../components/ai/WealthGod';
 import { DailyFortune } from '../components/fortune/DailyFortune';
 import { CoinAnimation } from '../components/animation/CoinAnimation';
@@ -40,6 +41,7 @@ export function HomePage() {
   const todayIsFriday = isFriday();
   
   const [showStrategyModal, setShowStrategyModal] = useState(false);
+  const [showReverseModal, setShowReverseModal] = useState(false);
   const [zodiacSign, setZodiacSign] = useState('');
   const [showCoinsAfterExplosion, setShowCoinsAfterExplosion] = useState(false);
   const [showShenlongSummon, setShowShenlongSummon] = useState(false);
@@ -159,6 +161,42 @@ export function HomePage() {
   const handleShenlongComplete = () => {
     setShowShenlongSummon(false);
   };
+
+  const handleReverseSelection = () => {
+    setShowReverseModal(true);
+  };
+
+  const handleKeepReverseSelection = (selection: { redBalls: number[], blueBalls: number[] }) => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]);
+    }
+
+    const today = getLocalDateFromBeijing();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const lotteryId = `${year}${month}${day}`;
+
+    addHistory({
+      lotteryType: lotteryType,
+      lotteryId,
+      numbers: selection,
+      timestamp: Date.now(),
+      strategyType: 'reverse_selection',
+    });
+
+    success('保存成功');
+
+    setTimeout(() => {
+      console.log('[HomePage] Triggering celebration animations');
+      setShowCoinsAfterExplosion(true);
+      setShowShenlongSummon(true);
+    }, 1000);
+
+    setTimeout(() => {
+      navigate('/history');
+    }, 5500);
+  };
  
   return (
     <div className="min-h-screen bg-background-primary pb-40" style={{ '--primary-color': luckyColor.primaryColor } as React.CSSProperties}>
@@ -220,9 +258,18 @@ export function HomePage() {
             onClear={clearSelection}
             onRandom={() => setShowStrategyModal(true)}
             onSave={handleSave}
+            onReverse={handleReverseSelection}
             isComplete={isComplete}
             lotteryType={lotteryType}
             loading={isSaving}
+          />
+
+          <ReverseSelectionModal
+            isOpen={showReverseModal}
+            config={config}
+            lotteryType={lotteryType}
+            onClose={() => setShowReverseModal(false)}
+            onKeep={handleKeepReverseSelection}
           />
 
           <DragonBallAnimation

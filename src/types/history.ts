@@ -9,7 +9,7 @@ export interface HistoryRecord {
     blueBalls: number[];
   };
   timestamp: number;
-  strategyType: 'balanced_odd_even' | 'sum_range' | 'full_random' | 'ai_god';
+  strategyType: 'balanced_odd_even' | 'sum_range' | 'full_random' | 'ai_god' | 'reverse_selection';
   drawDate?: string;
   drawNumbers?: {
     redBalls: number[];
