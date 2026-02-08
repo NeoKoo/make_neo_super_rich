@@ -37,6 +37,8 @@ export function ReverseSelectionModal({
   const [isSpinning, setIsSpinning] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
+  const isLastSet = !poolManager.canGenerate(config) && state.currentSelection !== null
+
   useEffect(() => {
     if (isOpen && !state.isActive) {
       resetSelection()
@@ -126,7 +128,14 @@ export function ReverseSelectionModal({
 
       <div className="relative w-full max-w-2xl mx-4 bg-background-primary rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h2 className="text-xl font-bold text-text-primary">反选选号</h2>
+          <div>
+            <h2 className="text-xl font-bold text-text-primary">
+              {isLastSet ? '这是最后一组号码！' : '反选选号'}
+            </h2>
+            {isLastSet && (
+              <p className="text-sm text-yellow-400 mt-1">剩余号码已不足生成新组，这是您的最后选择</p>
+            )}
+          </div>
           <button
             onClick={handleClose}
             className="p-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -301,37 +310,43 @@ export function ReverseSelectionModal({
         {state.currentSelection && (
           <div className="p-4 border-t border-white/10 bg-background-secondary/50">
             <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleGenerate}
-                disabled={state.isAnimating || !poolManager.canGenerate(config)}
-                className="flex-1"
-              >
-                <RefreshCw className="w-4 h-4 mr-1" />
-                生成新组
-              </Button>
+              {!isLastSet && (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleGenerate}
+                    disabled={state.isAnimating || !poolManager.canGenerate(config)}
+                    className="flex-1"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    生成新组
+                  </Button>
 
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleExclude}
-                disabled={state.isAnimating || !state.currentSelection}
-                className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400"
-              >
-                <Trash2 className="w-4 h-4 mr-1" />
-                剔除这组
-              </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleExclude}
+                    disabled={state.isAnimating || !state.currentSelection}
+                    className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    剔除这组
+                  </Button>
+                </>
+              )}
 
               <Button
                 variant="primary"
-                size="sm"
+                size={isLastSet ? 'lg' : 'sm'}
                 onClick={handleKeep}
                 disabled={state.isAnimating || !state.currentSelection}
-                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400"
+                className={`flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 ${
+                  isLastSet ? 'text-lg font-bold py-3 animate-pulse' : ''
+                }`}
               >
                 <Check className="w-4 h-4 mr-1" />
-                保留这组
+                {isLastSet ? '保留这最后一组' : '保留这组'}
               </Button>
             </div>
           </div>
