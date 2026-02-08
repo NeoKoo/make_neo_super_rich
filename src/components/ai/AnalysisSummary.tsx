@@ -41,12 +41,14 @@ function AnalysisSummary({ recommendation }: AnalysisSummaryProps) {
         </div>
         
         {/* 运势等级 */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-purple-200/80">运势等级</span>
-          <div className={`px-3 py-1 rounded-lg border ${getFortuneLevelColor(recommendation.overallAnalysis.fortuneLevel)}`}>
-            <span className="text-sm font-semibold">{recommendation.overallAnalysis.fortuneLevel}</span>
+        {recommendation.overallAnalysis.fortuneLevel && (
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-purple-200/80">运势等级</span>
+            <div className={`px-3 py-1 rounded-lg border ${getFortuneLevelColor(recommendation.overallAnalysis.fortuneLevel)}`}>
+              <span className="text-sm font-semibold">{recommendation.overallAnalysis.fortuneLevel}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 分析摘要 */}
         <div className="mb-3 p-3 bg-white/5 dark:bg-gray-800/30 rounded-lg">

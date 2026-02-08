@@ -122,33 +122,53 @@ export function HomePage() {
     success('AI财神推荐成功');
   };
  
-  const handleSaveAIRecommendation = () => {
+  const handleSaveAIRecommendation = (selections?: Array<{redBalls: number[], blueBalls: number[]}>) => {
     if ('vibrate' in navigator) {
       navigator.vibrate([100, 50, 100]);
     }
- 
+
     const today = getLocalDateFromBeijing();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const lotteryId = `${year}${month}${day}`;
- 
-    addHistory({
-      lotteryType: lotteryType,
-      lotteryId,
-      numbers: { redBalls, blueBalls },
-      timestamp: Date.now(),
-      strategyType: 'ai_god',
-    });
- 
-    success('保存成功');
- 
+
+    // 如果传入了多组号码，保存所有组
+    if (selections && selections.length > 1) {
+      addHistory({
+        lotteryType: lotteryType,
+        lotteryId,
+        numbers: selections[0], // 第一组作为主记录
+        timestamp: Date.now(),
+        strategyType: 'ai_god',
+        batchSelections: selections, // 所有组
+        batchInfo: {
+          totalSets: selections.length,
+          remainingRed: [],
+          remainingBlue: []
+        }
+      });
+
+      success(`成功保存 ${selections.length} 组财神推荐号码`);
+    } else {
+      // 单组保存（向后兼容）
+      addHistory({
+        lotteryType: lotteryType,
+        lotteryId,
+        numbers: { redBalls, blueBalls },
+        timestamp: Date.now(),
+        strategyType: 'ai_god',
+      });
+
+      success('保存成功');
+    }
+
     setTimeout(() => {
       console.log('[HomePage] Triggering celebration animations');
       setShowCoinsAfterExplosion(true);
       setShowShenlongSummon(true);
     }, 1000);
- 
+
     setTimeout(() => {
       navigate('/history');
     }, 5500);
@@ -186,6 +206,44 @@ export function HomePage() {
     });
 
     success('保存成功');
+
+    setTimeout(() => {
+      console.log('[HomePage] Triggering celebration animations');
+      setShowCoinsAfterExplosion(true);
+      setShowShenlongSummon(true);
+    }, 1000);
+
+    setTimeout(() => {
+      navigate('/history');
+    }, 5500);
+  };
+
+  const handleKeepAllReverseSelection = (
+    selections: { redBalls: number[], blueBalls: number[] }[],
+    batchInfo: { totalSets: number; remainingRed: number[]; remainingBlue: number[] }
+  ) => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]);
+    }
+
+    const today = getLocalDateFromBeijing();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const lotteryId = `${year}${month}${day}`;
+
+    // 保存第一组到主记录
+    addHistory({
+      lotteryType: lotteryType,
+      lotteryId,
+      numbers: selections[0], // 第一组作为主记录
+      timestamp: Date.now(),
+      strategyType: 'reverse_selection',
+      batchSelections: selections, // 所有组
+      batchInfo: batchInfo // 统计信息
+    });
+
+    success(`成功保存 ${batchInfo.totalSets} 组号码`);
 
     setTimeout(() => {
       console.log('[HomePage] Triggering celebration animations');
@@ -270,6 +328,7 @@ export function HomePage() {
             lotteryType={lotteryType}
             onClose={() => setShowReverseModal(false)}
             onKeep={handleKeepReverseSelection}
+            onKeepAll={handleKeepAllReverseSelection}
           />
 
           <DragonBallAnimation

@@ -23,6 +23,15 @@ export interface NumberPoolManager {
   reset(): void
   getExcludedRedBalls(): Set<number>
   getExcludedBlueBalls(): Set<number>
+
+  // 新增方法：生成所有可能的剩余号码组
+  generateAllRemainingSets(config: LotteryConfig): NumberSelection[]
+
+  // 新增方法：获取剩余但无法组成完整组的号码
+  getRemainingBalls(config: LotteryConfig): {
+    redBalls: number[];
+    blueBalls: number[];
+  }
 }
 
 export function createNumberPool(
@@ -124,6 +133,88 @@ export function createNumberPool(
 
     getExcludedBlueBalls(): Set<number> {
       return new Set(excludedBlueBalls)
+    },
+
+    generateAllRemainingSets(config: LotteryConfig): NumberSelection[] {
+      const sets: NumberSelection[] = []
+      let workingExcludedRed = new Set<number>()
+      let workingExcludedBlue = new Set<number>()
+
+      while (true) {
+        // 计算当前可用号码
+        const availableRed: number[] = []
+        const availableBlue: number[] = []
+
+        for (let i = config.redBalls.min; i <= config.redBalls.max; i++) {
+          if (!excludedRedBalls.has(i) && !workingExcludedRed.has(i)) {
+            availableRed.push(i)
+          }
+        }
+
+        for (let i = config.blueBalls.min; i <= config.blueBalls.max; i++) {
+          if (!excludedBlueBalls.has(i) && !workingExcludedBlue.has(i)) {
+            availableBlue.push(i)
+          }
+        }
+
+        // 检查是否能组成完整组
+        if (availableRed.length < config.redBalls.count ||
+            availableBlue.length < config.blueBalls.count) {
+          break
+        }
+
+        // 随机选择一组
+        const shuffledRed = shuffle(availableRed)
+        const shuffledBlue = shuffle(availableBlue)
+
+        const redBalls = shuffledRed
+          .slice(0, config.redBalls.count)
+          .sort((a, b) => a - b)
+
+        const blueBalls = shuffledBlue
+          .slice(0, config.blueBalls.count)
+          .sort((a, b) => a - b)
+
+        const selection: NumberSelection = { redBalls, blueBalls }
+        sets.push(selection)
+
+        // 标记这组号码为已使用
+        redBalls.forEach(num => workingExcludedRed.add(num))
+        blueBalls.forEach(num => workingExcludedBlue.add(num))
+      }
+
+      return sets
+    },
+
+    getRemainingBalls(config: LotteryConfig): {
+      redBalls: number[];
+      blueBalls: number[];
+    } {
+      const generatedSets = this.generateAllRemainingSets(config)
+      const usedRed = new Set<number>()
+      const usedBlue = new Set<number>()
+
+      generatedSets.forEach(set => {
+        set.redBalls.forEach(num => usedRed.add(num))
+        set.blueBalls.forEach(num => usedBlue.add(num))
+      })
+
+      const remainingRed: number[] = []
+      const remainingBlue: number[] = []
+
+      for (let i = config.redBalls.min; i <= config.redBalls.max; i++) {
+        if (!excludedRedBalls.has(i) && !usedRed.has(i)) {
+          remainingRed.push(i)
+        }
+      }
+
+      for (let i = config.blueBalls.min; i <= config.blueBalls.max; i++) {
+        if (!excludedBlueBalls.has(i) && !usedBlue.has(i)) {
+          remainingBlue.push(i)
+        }
+      }
+
+      return { redBalls: remainingRed, blueBalls: remainingBlue }
     }
   }
 }

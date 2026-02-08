@@ -4,6 +4,43 @@ import { EnhancedLotteryRecommendation, AIRecommendationResult } from '../types/
 import { getLocalDateFromBeijing } from './dateUtils';
 import { aiRequestQueue, aiAPICache, generateCacheKey, queuedCachedRequest } from './apiQueue';
 
+/**
+ * 修复AI生成的常见JSON错误
+ */
+function cleanJSON(jsonString: string): string {
+  let cleaned = jsonString;
+
+  // 1. 移除数组或对象末尾的多余逗号
+  cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+
+  // 2. 移除不完整的对象（可能因为AI被截断）
+  // 查找最后一个完整的对象
+  const lastBraceIndex = cleaned.lastIndexOf('}');
+  if (lastBraceIndex > 0) {
+    const firstBraceIndex = cleaned.indexOf('{');
+    if (firstBraceIndex >= 0) {
+      // 提取最外层的完整JSON
+      const extracted = cleaned.substring(firstBraceIndex, lastBraceIndex + 1);
+      // 检查是否是完整的
+      try {
+        JSON.parse(extracted);
+        cleaned = extracted;
+      } catch (e) {
+        // 如果不完整，尝试修复
+        console.log('[cleanJSON] Attempting to fix incomplete JSON');
+      }
+    }
+  }
+
+  // 3. 移除可能的尾随垃圾字符
+  cleaned = cleaned.trim();
+
+  // 4. 移除控制字符
+  cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, '');
+
+  return cleaned;
+}
+
 interface ZhipuMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -181,10 +218,14 @@ export async function getAIRecommendation(
 
     const aiContent = data.choices[0].message.content.trim();
 
-    console.log('[AI Response]', aiContent);
-    console.log('[AI Response parsed]', parseAIResponse(aiContent, lotteryType));
+    console.log('[AI Response] Raw content:', aiContent);
+    console.log('[AI Response] Content length:', aiContent.length);
 
-    return parseAIResponse(aiContent, lotteryType);
+    const parsedResult = parseAIResponse(aiContent, lotteryType);
+    console.log('[AI Response] Parsed result:', parsedResult);
+    console.log('[AI Response] Parsed result keys:', parsedResult ? Object.keys(parsedResult) : 'null');
+
+    return parsedResult;
   };
 
   try {
@@ -214,6 +255,18 @@ export async function getAIRecommendation(
   } catch (error) {
     console.error('AI recommendation error:', error);
 
+    // 处理超时错误（AbortError）
+    if (error instanceof Error && error.name === 'AbortError') {
+      return {
+        success: false,
+        error: {
+          code: 'TIMEOUT',
+          message: 'AI请求超时',
+          userFriendlyMessage: 'AI请求超时，生成5组号码需要较长时间，请稍后再试'
+        }
+      };
+    }
+
     if (error instanceof APIError) {
       return {
         success: false,
@@ -230,7 +283,9 @@ export async function getAIRecommendation(
       error: {
         code: 'UNKNOWN',
         message: error instanceof Error ? error.message : 'Unknown error',
-        userFriendlyMessage: 'AI暂时无法生成推荐，请稍后再试'
+        userFriendlyMessage: error instanceof Error && error.message.includes('aborted')
+          ? 'AI请求超时，生成5组号码需要较长时间，请稍后再试'
+          : 'AI暂时无法生成推荐，请稍后再试'
       }
     };
   }
@@ -254,11 +309,17 @@ function getFriendlyErrorMessage(error: APIError): string {
     '403': '权限不足',
     '429': '请求过于频繁（429），请等待几秒后重试',
     '500': '服务器错误，请稍后再试',
-    '503': '服务暂时不可用，请稍后再试'
+    '503': '服务暂时不可用，请稍后再试',
+    'ABORTED': 'AI请求超时，生成5组号码需要较长时间，请稍后再试'
   };
 
   if (errorCodeMap[error.code]) {
     return errorCodeMap[error.code];
+  }
+
+  // 检查是否是超时错误
+  if (error.message.includes('aborted') || error.message.includes('timeout')) {
+    return 'AI请求超时，生成5组号码需要较长时间，请稍后再试';
   }
 
   if (error.statusCode >= 400 && error.statusCode < 500) {
@@ -275,35 +336,304 @@ function getFriendlyErrorMessage(error: APIError): string {
 function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SHUANGSEQIU): EnhancedLotteryRecommendation | null {
   try {
     console.log('[AI Parse] Attempting to parse JSON response for:', lotteryType);
+    console.log('[AI Parse] Full response length:', text.length);
+    console.log('[AI Parse] Response preview (first 1000 chars):', text.substring(0, 1000));
 
-    // 尝试解析JSON格式的响应
+    // 预处理：清理文本中的特殊字符
+    let cleanText = text;
+
+    // 移除markdown代码块标记
+    cleanText = cleanText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+    // 替换所有反引号为空格
+    cleanText = cleanText.replace(/`/g, ' ');
+
+    // 移除可能存在的注释（单行和多行）
+    cleanText = cleanText.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+
+    // 修复常见的JSON错误
+    cleanText = cleanJSON(cleanText);
+
+    console.log('[AI Parse] Cleaned text preview (first 1000 chars):', cleanText.substring(0, 1000));
+
+    // 尝试解析JSON
     let jsonData: any;
     try {
-      jsonData = JSON.parse(text);
+      jsonData = JSON.parse(cleanText);
+      console.log('[AI Parse] Direct parse successful, keys:', Object.keys(jsonData));
     } catch (jsonError) {
-      console.error('[AI Parse Error] Failed to parse JSON:', jsonError);
-      console.log('[AI Parse] Attempting to extract JSON from text');
-      
-      // 尝试从文本中提取JSON部分
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.error('[AI Parse Error] No JSON found in response');
+      console.error('[AI Parse Error] Direct parse failed:', jsonError);
+
+      // 移除可能的markdown代码块标记
+      cleanText = cleanText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+      // 尝试提取JSON对象（从清理后的文本中）
+      // 尝试多种提取方法
+      let extractedJson: string | null = null;
+
+      // 方法1: 尝试匹配完整的JSON对象（平衡花括号）
+      const firstBraceIndex = cleanText.indexOf('{');
+      if (firstBraceIndex >= 0) {
+        let braceCount = 0;
+        let inString = false;
+        let escapeNext = false;
+
+        for (let i = firstBraceIndex; i < cleanText.length; i++) {
+          const char = cleanText[i];
+
+          if (escapeNext) {
+            escapeNext = false;
+            continue;
+          }
+
+          if (char === '\\') {
+            escapeNext = true;
+            continue;
+          }
+
+          if (char === '"') {
+            inString = !inString;
+            continue;
+          }
+
+          if (!inString) {
+            if (char === '{') braceCount++;
+            if (char === '}') braceCount--;
+
+            if (braceCount === 0) {
+              // 找到完整的JSON对象
+              extractedJson = cleanText.substring(firstBraceIndex, i + 1);
+              console.log('[AI Parse] Extracted complete JSON using brace counting');
+              break;
+            }
+          }
+        }
+      }
+
+      if (!extractedJson) {
+        console.error('[AI Parse Error] Could not extract complete JSON');
+        console.log('[AI Parse] Cleaned text (first 2000 chars):', cleanText.substring(0, 2000));
+        console.log('[AI Parse] Cleaned text length:', cleanText.length);
         return null;
       }
-      
-      jsonData = JSON.parse(jsonMatch[0]);
+
+      // 尝试多次修复和解析
+      let parseAttempts = 0;
+      const maxAttempts = 3;
+
+      while (parseAttempts < maxAttempts) {
+        try {
+          jsonData = JSON.parse(extractedJson);
+          console.log('[AI Parse] Parse successful on attempt', parseAttempts + 1);
+          break;
+        } catch (parseError: any) {
+          parseAttempts++;
+          console.error('[AI Parse Error] Parse attempt', parseAttempts, 'failed:', parseError.message);
+
+          if (parseAttempts >= maxAttempts) {
+            console.error('[AI Parse Error] All parse attempts failed');
+            console.log('[AI Parse] Extracted JSON:', extractedJson.substring(0, 1000));
+            return null;
+          }
+
+          // 尝试进一步清理
+          extractedJson = cleanJSON(extractedJson);
+        }
+      }
+
+      if (!jsonData) {
+        return null;
+      }
     }
 
-    console.log('[AI Parse] Parsed JSON data:', jsonData);
-
-    // 验证必要字段
-    if (!jsonData.redBalls || !jsonData.blueBalls || !Array.isArray(jsonData.redBalls) || !Array.isArray(jsonData.blueBalls)) {
-      console.error('[AI Parse Error] Missing or invalid redBalls/blueBalls fields');
-      return null;
-    }
+    console.log('[AI Parse] Parsed JSON data keys:', Object.keys(jsonData));
+    console.log('[AI Parse] Has recommendations:', !!jsonData.recommendations);
+    console.log('[AI Parse] Has redBalls/blueBalls:', !!jsonData.redBalls, !!jsonData.blueBalls);
 
     const redBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 33 : 35;
     const blueBallMax = lotteryType === LotteryType.SHUANGSEQIU ? 16 : 12;
+
+    // 新格式：包含 recommendations 数组
+    if (jsonData.recommendations && Array.isArray(jsonData.recommendations) && jsonData.recommendations.length > 0) {
+      console.log('[AI Parse] New format with recommendations array, count:', jsonData.recommendations.length);
+
+      const recommendations = jsonData.recommendations.map((rec: any, index: number) => {
+        if (!rec.redBalls || !rec.blueBalls) {
+          console.error('[AI Parse Error] Missing redBalls/blueBalls in recommendation', index);
+          return null;
+        }
+
+        const redBalls = rec.redBalls
+          .map((n: any) => parseInt(n))
+          .filter((n: number) => !isNaN(n) && n >= 1 && n <= redBallMax);
+
+        const blueBalls = rec.blueBalls
+          .map((n: any) => parseInt(n))
+          .filter((n: number) => !isNaN(n) && n >= 1 && n <= blueBallMax);
+
+        if (redBalls.length === 0 || blueBalls.length === 0) {
+          console.error('[AI Parse Error] No valid balls in recommendation', index);
+          return null;
+        }
+
+        // 处理号码理由 - 可能是字符串数组或对象数组
+        let numberReasons: any[] = [];
+        const rawReasons = rec.numberReasons || [];
+
+        if (rawReasons.length > 0) {
+          // 判断是字符串数组还是对象数组
+          if (typeof rawReasons[0] === 'string') {
+            // 字符串数组：转换为对象数组
+            let ballIndex = 0;
+            numberReasons = redBalls.map((ball: number) => {
+              const reasonText = rawReasons[ballIndex] || `红球 ${ball} 是幸运号码`;
+              ballIndex++;
+              return {
+                number: ball,
+                type: 'red' as const,
+                reasons: {
+                  primary: reasonText,
+                  metaphysics: '符合玄学原理',
+                  zodiac: '与用户星座相合',
+                  wuxing: '五行属性平衡',
+                  numerology: '数字命理吉祥',
+                  timing: '时机恰到好处'
+                },
+                confidence: 75 + Math.floor(Math.random() * 20),
+                luckyElements: ['幸运数字', '吉利符号']
+              };
+            });
+
+            blueBalls.forEach((ball: number) => {
+              const reasonText = rawReasons[ballIndex] || `蓝球 ${ball} 是幸运号码`;
+              ballIndex++;
+              numberReasons.push({
+                number: ball,
+                type: 'blue' as const,
+                reasons: {
+                  primary: reasonText,
+                  metaphysics: '符合玄学原理',
+                  zodiac: '与用户星座相合',
+                  wuxing: '五行属性平衡',
+                  numerology: '数字命理吉祥',
+                  timing: '时机恰到好处'
+                },
+                confidence: 75 + Math.floor(Math.random() * 20),
+                luckyElements: ['幸运数字', '吉利符号']
+              });
+            });
+          } else {
+            // 对象数组：直接使用
+            numberReasons = rawReasons;
+          }
+        }
+
+        // 如果没有号码理由，生成默认的
+        if (numberReasons.length === 0) {
+          numberReasons = redBalls.map((ball: number) => ({
+            number: ball,
+            type: 'red' as const,
+            reasons: {
+              primary: `红球 ${ball} 是幸运号码`,
+              metaphysics: '符合五行相生原理',
+              zodiac: '与用户星座相合',
+              wuxing: '五行属性平衡',
+              numerology: '数字能量强劲',
+              timing: '时机恰到好处'
+            },
+            confidence: 75 + Math.floor(Math.random() * 20),
+            luckyElements: ['幸运数字', '吉利符号']
+          }));
+
+          blueBalls.forEach((ball: number) => {
+            numberReasons.push({
+              number: ball,
+              type: 'blue' as const,
+              reasons: {
+                primary: `蓝球 ${ball} 是幸运号码`,
+                metaphysics: '符合五行相生原理',
+                zodiac: '与用户星座相合',
+                wuxing: '五行属性平衡',
+                numerology: '数字能量强劲',
+                timing: '时机恰到好处'
+              },
+              confidence: 75 + Math.floor(Math.random() * 20),
+              luckyElements: ['幸运数字', '吉利符号']
+            });
+          });
+        }
+
+        // 处理setAnalysis - 可能是字符串或对象
+        let setAnalysis: any;
+        if (typeof rec.setAnalysis === 'string') {
+          setAnalysis = {
+            summary: rec.setAnalysis,
+            fortuneLevel: ['吉', '中吉', '吉', '吉', '中吉'][index] as '大吉' | '吉' | '中吉' | '平' | '凶',
+            keyStrengths: ['能量平衡', '数字吉利', '运势亨通'],
+            recommendationRank: index + 1
+          };
+        } else {
+          setAnalysis = rec.setAnalysis || {
+            summary: `第${index + 1}组号码推荐`,
+            fortuneLevel: '吉' as const,
+            keyStrengths: ['能量平衡', '数字吉利'],
+            recommendationRank: index + 1
+          };
+        }
+
+        return {
+          redBalls,
+          blueBalls,
+          numberReasons,
+          setAnalysis
+        };
+      }).filter((rec: any) => rec !== null);
+
+      if (recommendations.length === 0) {
+        console.error('[AI Parse Error] No valid recommendations after filtering');
+        return null;
+      }
+
+      // 使用第一组作为默认推荐（向后兼容）
+      const firstSet = recommendations[0];
+
+      const result: EnhancedLotteryRecommendation = {
+        // 向后兼容：使用第一组数据
+        redBalls: firstSet.redBalls,
+        blueBalls: firstSet.blueBalls,
+        text: jsonData.overallAnalysis?.summary || 'AI财神推荐',
+        numberReasons: firstSet.numberReasons,
+
+        // 新增：多组推荐
+        recommendations,
+
+        overallAnalysis: {
+          summary: jsonData.overallAnalysis?.summary || '综合分析显示今日运势良好',
+          bestSet: jsonData.overallAnalysis?.bestSet || 1,
+          keyFactors: jsonData.overallAnalysis?.keyFactors || ['星座运势', '五行平衡', '数字能量'],
+          advice: jsonData.overallAnalysis?.advice || '建议在幸运时间内购买',
+          bestTiming: jsonData.overallAnalysis?.bestTiming || '今日下午3-5点'
+        },
+        metaphysicsInsight: jsonData.metaphysicsInsight || {
+          zodiacInfluence: '星座能量加持',
+          wuxingBalance: '五行相生相助',
+          numerologyPattern: '数字组合吉利',
+          energyLevel: 75
+        }
+      };
+
+      console.log('[AI Parse] Successfully parsed', recommendations.length, 'recommendations');
+      return result;
+    }
+
+    // 旧格式：单组号码（向后兼容）
+    console.log('[AI Parse] Using old format (single set)');
+
+    if (!jsonData.redBalls || !jsonData.blueBalls || !Array.isArray(jsonData.redBalls) || !Array.isArray(jsonData.blueBalls)) {
+      console.error('[AI Parse Error] Missing or invalid redBalls/blueBalls fields');
+      console.error('[AI Parse] redBalls:', jsonData.redBalls, 'blueBalls:', jsonData.blueBalls);
+      return null;
+    }
 
     const redBalls = jsonData.redBalls
       .map((n: any) => parseInt(n))
@@ -315,47 +645,22 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
 
     console.log('[AI Parse] Red balls:', redBalls);
     console.log('[AI Parse] Blue balls:', blueBalls);
-    console.log('[AI Parse] Number reasons from AI:', jsonData.numberReasons);
-    console.log('[AI Parse] Number reasons type:', typeof jsonData.numberReasons);
-    console.log('[AI Parse] Number reasons is array:', Array.isArray(jsonData.numberReasons));
 
     if (redBalls.length === 0 || blueBalls.length === 0) {
       console.error('[AI Parse Error] No valid balls after filtering');
       return null;
     }
 
-    // 构建增强的推荐结果
-    const result: EnhancedLotteryRecommendation = {
-      redBalls,
-      blueBalls,
-      text: jsonData.overallAnalysis?.summary || 'AI财神推荐',
-      numberReasons: jsonData.numberReasons || [],
-      overallAnalysis: jsonData.overallAnalysis || {
-        summary: '综合分析显示今日运势良好',
-        fortuneLevel: '吉',
-        keyFactors: ['星座运势', '五行平衡', '数字能量'],
-        advice: '建议在幸运时间内购买',
-        bestTiming: '今日下午3-5点'
-      },
-      metaphysicsInsight: jsonData.metaphysicsInsight || {
-        zodiacInfluence: '星座能量加持',
-        wuxingBalance: '五行相生相助',
-        numerologyPattern: '数字组合吉利',
-        energyLevel: 75
-      }
-    };
+    // 生成号码理由
+    let numberReasons = jsonData.numberReasons || [];
 
-    console.log('[AI Parse] Initial numberReasons:', result.numberReasons);
-
-    // 处理每个号码的理由，确保有默认值
-    // 如果 AI 没有返回 numberReasons，则根据红球和蓝球生成默认的理由
-    if (!result.numberReasons || result.numberReasons.length === 0) {
+    if (!numberReasons || numberReasons.length === 0) {
       console.log('[AI Parse] No numberReasons from AI, generating default reasons');
-      
+
       // 为每个红球生成默认理由
-      result.numberReasons = redBalls.map((ball: number) => ({
+      numberReasons = redBalls.map((ball: number) => ({
         number: ball,
-        type: 'red',
+        type: 'red' as const,
         reasons: {
           primary: `红球 ${ball} 是今日幸运号码之一`,
           metaphysics: '符合五行相生原理',
@@ -364,15 +669,15 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
           numerology: '数字能量强劲',
           timing: '时机恰到好处'
         },
-        confidence: 75 + Math.floor(Math.random() * 20), // 随机置信度 75-95
+        confidence: 75 + Math.floor(Math.random() * 20),
         luckyElements: ['幸运数字', '吉利符号']
       }));
 
       // 为每个蓝球生成默认理由
       blueBalls.forEach((ball: number) => {
-        result.numberReasons.push({
+        numberReasons.push({
           number: ball,
-          type: 'blue',
+          type: 'blue' as const,
           reasons: {
             primary: `蓝球 ${ball} 是今日幸运号码之一`,
             metaphysics: '符合五行相生原理',
@@ -381,14 +686,13 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
             numerology: '数字能量强劲',
             timing: '时机恰到好处'
           },
-          confidence: 75 + Math.floor(Math.random() * 20), // 随机置信度 75-95
+          confidence: 75 + Math.floor(Math.random() * 20),
           luckyElements: ['幸运数字', '吉利符号']
         });
       });
     } else {
       // 处理 AI 返回的 numberReasons
-      result.numberReasons = result.numberReasons.map((reason: any, mapIndex: number) => {
-        // 如果 reason 是字符串，则尝试解析
+      numberReasons = numberReasons.map((reason: any, mapIndex: number) => {
         if (typeof reason === 'string') {
           console.log('[AI Parse] Reason is string, trying to parse:', reason);
           try {
@@ -398,10 +702,8 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
           }
         }
 
-        // 确保有 number 字段
         let ballNumber = reason.number;
         if (ballNumber === undefined || ballNumber === null) {
-          // 如果没有 number 字段，尝试从红球或蓝球数组中获取
           if (mapIndex < redBalls.length) {
             ballNumber = redBalls[mapIndex];
           } else {
@@ -427,11 +729,122 @@ function parseAIResponse(text: string, lotteryType: LotteryType = LotteryType.SH
       });
     }
 
-    console.log('[AI Parse] Final numberReasons:', result.numberReasons);
+    // 生成5组推荐（基于AI返回的一组进行变体）
+    console.log('[AI Parse] Generating 5 recommendations from single set');
+    const allRedBalls = Array.from({ length: redBallMax }, (_, i) => i + 1);
+    const allBlueBalls = Array.from({ length: blueBallMax }, (_, i) => i + 1);
+    const usedRedBalls = new Set(redBalls);
+    const usedBlueBalls = new Set(blueBalls);
+    const availableRedBalls = allRedBalls.filter(n => !usedRedBalls.has(n));
+    const availableBlueBalls = allBlueBalls.filter(n => !usedBlueBalls.has(n));
 
+    // Shuffle available balls
+    const shuffleArray = <T,>(arr: T[]): T[] => {
+      const result = [...arr];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    };
+
+    const recommendations = [
+      {
+        redBalls: [...redBalls].sort((a, b) => a - b),
+        blueBalls: [...blueBalls].sort((a, b) => a - b),
+        numberReasons: [...numberReasons],
+        setAnalysis: {
+          summary: jsonData.overallAnalysis?.summary || 'AI财神推荐',
+          fortuneLevel: (jsonData.overallAnalysis?.fortuneLevel || '吉') as '大吉' | '吉' | '中吉' | '平' | '凶',
+          keyStrengths: jsonData.overallAnalysis?.keyFactors || ['能量平衡', '数字吉利'],
+          recommendationRank: 1
+        }
+      }
+    ];
+
+    // 生成另外4组变体
+    for (let i = 1; i < 5; i++) {
+      const shuffledRed = shuffleArray(availableRedBalls);
+      const shuffledBlue = shuffleArray(availableBlueBalls);
+
+      const newRedBalls = shuffledRed.slice(0, redBalls.length).sort((a, b) => a - b);
+      const newBlueBalls = shuffledBlue.slice(0, blueBalls.length).sort((a, b) => a - b);
+
+      const newNumberReasons = [
+        ...newRedBalls.map((ball: number) => ({
+          number: ball,
+          type: 'red' as const,
+          reasons: {
+            primary: `红球 ${ball} 是幸运号码`,
+            metaphysics: '符合五行相生原理',
+            zodiac: '与用户星座相合',
+            wuxing: '五行属性平衡',
+            numerology: '数字能量强劲',
+            timing: '时机恰到好处'
+          },
+          confidence: 70 + Math.floor(Math.random() * 25),
+          luckyElements: ['幸运数字', '吉利符号']
+        })),
+        ...newBlueBalls.map((ball: number) => ({
+          number: ball,
+          type: 'blue' as const,
+          reasons: {
+            primary: `蓝球 ${ball} 是幸运号码`,
+            metaphysics: '符合五行相生原理',
+            zodiac: '与用户星座相合',
+            wuxing: '五行属性平衡',
+            numerology: '数字能量强劲',
+            timing: '时机恰到好处'
+          },
+          confidence: 70 + Math.floor(Math.random() * 25),
+          luckyElements: ['幸运数字', '吉利符号']
+        }))
+      ];
+
+      recommendations.push({
+        redBalls: newRedBalls,
+        blueBalls: newBlueBalls,
+        numberReasons: newNumberReasons,
+        setAnalysis: {
+          summary: `基于AI推荐的变体${i + 1}`,
+          fortuneLevel: ['吉', '中吉', '吉', '中吉'][i] as '大吉' | '吉' | '中吉' | '平' | '凶',
+          keyStrengths: ['能量平衡', '数字吉利', '运势亨通', '时机巧合'],
+          recommendationRank: i + 1
+        }
+      });
+    }
+
+    // 构建增强的推荐结果
+    const result: EnhancedLotteryRecommendation = {
+      // 向后兼容：使用第一组数据
+      redBalls: recommendations[0].redBalls,
+      blueBalls: recommendations[0].blueBalls,
+      text: jsonData.overallAnalysis?.summary || 'AI财神推荐',
+      numberReasons: recommendations[0].numberReasons,
+
+      // 新增：多组推荐
+      recommendations,
+
+      overallAnalysis: jsonData.overallAnalysis || {
+        summary: '综合分析显示今日运势良好',
+        bestSet: 1,
+        keyFactors: ['星座运势', '五行平衡', '数字能量'],
+        advice: '建议在幸运时间内购买',
+        bestTiming: '今日下午3-5点'
+      },
+      metaphysicsInsight: jsonData.metaphysicsInsight || {
+        zodiacInfluence: '星座能量加持',
+        wuxingBalance: '五行相生相助',
+        numerologyPattern: '数字组合吉利',
+        energyLevel: 75
+      }
+    };
+
+    console.log('[AI Parse] Successfully generated', recommendations.length, 'recommendations from single set');
     return result;
   } catch (error) {
-    console.error('Parse AI response error:', error);
+    console.error('[AI Parse] Parse AI response error:', error);
+    console.error('[AI Parse] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return null;
   }
 }

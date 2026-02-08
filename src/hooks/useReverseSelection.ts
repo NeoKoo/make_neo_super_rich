@@ -23,6 +23,12 @@ export interface UseReverseSelectionReturn {
   setIsAnimating: (isAnimating: boolean) => void
   openReverseSelection: () => void
   closeReverseSelection: () => void
+
+  // 新增方法：生成并保存所有剩余号码组
+  keepAllRemainingSets: () => NumberSelection[] | null
+
+  // 新增方法：检查是否可以生成多组
+  canGenerateMultipleSets: () => { can: boolean; count: number }
 }
 
 export function useReverseSelection(
@@ -133,6 +139,30 @@ export function useReverseSelection(
     }))
   }, [])
 
+  const canGenerateMultipleSets = useCallback((): { can: boolean; count: number } => {
+    const allSets = poolManager.generateAllRemainingSets(config)
+    return {
+      can: allSets.length > 1,
+      count: allSets.length
+    }
+  }, [poolManager, config])
+
+  const keepAllRemainingSets = useCallback((): NumberSelection[] | null => {
+    const allSets = poolManager.generateAllRemainingSets(config)
+
+    if (allSets.length === 0) {
+      return null
+    }
+
+    setState(prev => ({
+      ...prev,
+      isActive: false,
+      currentSelection: null
+    }))
+
+    return allSets
+  }, [poolManager, config])
+
   return {
     state,
     poolManager,
@@ -143,6 +173,8 @@ export function useReverseSelection(
     toggleNumberPool,
     setIsAnimating,
     openReverseSelection,
-    closeReverseSelection
+    closeReverseSelection,
+    keepAllRemainingSets,
+    canGenerateMultipleSets
   }
 }

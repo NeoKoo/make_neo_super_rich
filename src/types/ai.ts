@@ -13,14 +13,32 @@ export interface NumberReason {
   luckyElements: string[] // 相关的幸运元素
 }
 
+export interface NumberSetRecommendation {
+  redBalls: number[]
+  blueBalls: number[]
+  numberReasons: NumberReason[] // 每个号码的详细理由
+  setAnalysis: {
+    summary: string // 该组号码的分析摘要
+    fortuneLevel: '大吉' | '吉' | '中吉' | '平' | '凶'
+    keyStrengths: string[] // 关键优势
+    recommendationRank: number // 推荐排名 (1-5)
+  }
+}
+
 export interface EnhancedLotteryRecommendation {
+  // 兼容旧版本：保留单组号码字段
   redBalls: number[]
   blueBalls: number[]
   text: string
   numberReasons: NumberReason[] // 每个号码的详细理由
+
+  // 新增：多组号码推荐
+  recommendations: NumberSetRecommendation[] // 5组号码推荐
+
   overallAnalysis: {
     summary: string // 整体分析摘要
-    fortuneLevel: '大吉' | '吉' | '中吉' | '平' | '凶'
+    fortuneLevel?: '大吉' | '吉' | '中吉' | '平' | '凶' // 运势等级（可选，用于向后兼容）
+    bestSet: number // 最佳推荐组编号
     keyFactors: string[] // 关键影响因素
     advice: string // 购彩建议
     bestTiming: string // 最佳购彩时机

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { LotteryConfig, NumberSelection } from '../../types/lottery'
 import { useReverseSelection } from '../../hooks/useReverseSelection'
 import { Button } from '../common/Button'
@@ -12,6 +12,13 @@ interface ReverseSelectionModalProps {
   lotteryType: string
   onClose: () => void
   onKeep: (selection: NumberSelection) => void
+
+  // 新增回调：批量保存
+  onKeepAll?: (selections: NumberSelection[], batchInfo: {
+    totalSets: number
+    remainingRed: number[]
+    remainingBlue: number[]
+  }) => void
 }
 
 export function ReverseSelectionModal({
@@ -19,7 +26,8 @@ export function ReverseSelectionModal({
   config,
   lotteryType,
   onClose,
-  onKeep
+  onKeep,
+  onKeepAll
 }: ReverseSelectionModalProps) {
   const {
     state,
@@ -27,6 +35,7 @@ export function ReverseSelectionModal({
     generateNewSelection,
     excludeCurrentSelection,
     keepCurrentSelection,
+    keepAllRemainingSets,
     resetSelection,
     toggleNumberPool,
     setIsAnimating,
@@ -38,6 +47,16 @@ export function ReverseSelectionModal({
   const [showHistory, setShowHistory] = useState(false)
 
   const isLastSet = !poolManager.canGenerate(config) && state.currentSelection !== null
+
+  // 计算多组信息
+  const canGenerateInfo = useMemo(() => {
+    const allSets = poolManager.generateAllRemainingSets(config)
+    return {
+      canGenerateMultiple: allSets.length > 1,
+      totalSets: allSets.length,
+      previewSets: allSets.slice(0, 3) // 只显示前3组预览
+    }
+  }, [poolManager, config, state.excludedRedBalls, state.excludedBlueBalls])
 
   useEffect(() => {
     if (isOpen && !state.isActive) {
@@ -96,6 +115,27 @@ export function ReverseSelectionModal({
     }
   }, [state.currentSelection, keepCurrentSelection, onKeep])
 
+  const handleKeepAll = useCallback(() => {
+    if (!onKeepAll) return
+
+    soundManager.playSaveSuccess()
+
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100])
+    }
+
+    const allSets = poolManager.generateAllRemainingSets(config)
+    const remaining = poolManager.getRemainingBalls(config)
+
+    keepAllRemainingSets()
+
+    onKeepAll(allSets, {
+      totalSets: allSets.length,
+      remainingRed: remaining.redBalls,
+      remainingBlue: remaining.blueBalls
+    })
+  }, [poolManager, config, onKeepAll, keepAllRemainingSets])
+
   const handleClose = useCallback(() => {
     if (state.history.length > 0) {
       if (confirm('确定要退出反选模式吗？已剔除的号码将被清空。')) {
@@ -130,11 +170,19 @@ export function ReverseSelectionModal({
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div>
             <h2 className="text-xl font-bold text-text-primary">
-              {isLastSet ? '这是最后一组号码！' : '反选选号'}
+              {isLastSet && canGenerateInfo.canGenerateMultiple
+                ? `剩余号码可生成 ${canGenerateInfo.totalSets} 组！`
+                : isLastSet
+                  ? '这是最后一组号码！'
+                  : '反选选号'}
             </h2>
-            {isLastSet && (
+            {isLastSet && canGenerateInfo.canGenerateMultiple ? (
+              <p className="text-sm text-purple-400 mt-1">
+                您可以选择保留这最后一组，或保留所有剩余的 {canGenerateInfo.totalSets} 组号码
+              </p>
+            ) : isLastSet ? (
               <p className="text-sm text-yellow-400 mt-1">剩余号码已不足生成新组，这是您的最后选择</p>
-            )}
+            ) : null}
           </div>
           <button
             onClick={handleClose}
@@ -257,6 +305,39 @@ export function ReverseSelectionModal({
                 </div>
               )}
 
+              {isLastSet && canGenerateInfo.canGenerateMultiple && (
+                <div className="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                  <div className="text-sm text-purple-300 mb-2">
+                    📊 剩余号码预览 (前3组)
+                  </div>
+                  <div className="space-y-2">
+                    {canGenerateInfo.previewSets.map((set: NumberSelection, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-background-tertiary/50 rounded">
+                        <span className="text-xs text-text-secondary">第{idx + 1}组:</span>
+                        <div className="flex gap-1">
+                          {set.redBalls.map((num: number) => (
+                            <span key={num} className="text-xs text-red-400 w-5 text-center">
+                              {num.toString().padStart(2, '0')}
+                            </span>
+                          ))}
+                          <span className="text-xs text-text-secondary">+</span>
+                          {set.blueBalls.map((num: number) => (
+                            <span key={num} className="text-xs text-blue-400 w-5 text-center">
+                              {num.toString().padStart(2, '0')}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    {canGenerateInfo.totalSets > 3 && (
+                      <div className="text-xs text-text-secondary text-center">
+                        ...还有 {canGenerateInfo.totalSets - 3} 组
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {state.history.length > 0 && (
                 <div>
                   <button
@@ -336,17 +417,32 @@ export function ReverseSelectionModal({
                 </>
               )}
 
+              {isLastSet && canGenerateInfo.canGenerateMultiple && onKeepAll && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleKeepAll}
+                  disabled={state.isAnimating}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400"
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  保留所有剩余 ({canGenerateInfo.totalSets}组)
+                </Button>
+              )}
+
               <Button
                 variant="primary"
-                size={isLastSet ? 'lg' : 'sm'}
+                size={isLastSet && !canGenerateInfo.canGenerateMultiple ? 'lg' : 'sm'}
                 onClick={handleKeep}
                 disabled={state.isAnimating || !state.currentSelection}
                 className={`flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 ${
-                  isLastSet ? 'text-lg font-bold py-3 animate-pulse' : ''
+                  isLastSet && !canGenerateInfo.canGenerateMultiple ? 'text-lg font-bold py-3 animate-pulse' : ''
                 }`}
               >
                 <Check className="w-4 h-4 mr-1" />
-                {isLastSet ? '保留这最后一组' : '保留这组'}
+                {isLastSet && !canGenerateInfo.canGenerateMultiple
+                  ? '保留这最后一组'
+                  : '保留这组'}
               </Button>
             </div>
           </div>
