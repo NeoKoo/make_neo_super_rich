@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AnalysisPage } from './pages/AnalysisPage';
+import { ToolsPage } from './pages/ToolsPage';
 import { soundManager } from './utils/soundManager';
 import { themeManager } from './utils/themeManager';
 import { useEffect } from 'react';
@@ -34,6 +35,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/analysis" element={<AnalysisPage />} />
+            <Route path="/tools" element={<ToolsPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>

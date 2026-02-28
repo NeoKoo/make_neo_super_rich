@@ -11,6 +11,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { RandomStrategy } from '../constants/randomStrategies';
 import { LotteryTypeBadge } from '../components/lottery/LotteryTypeBadge';
 import { NumberGrid } from '../components/lottery/NumberGrid';
+import { QuickAnalysis } from '../components/lottery/QuickAnalysis';
 import { RandomStrategyModal } from '../components/lottery/RandomStrategyModal';
 import { ActionButtons } from '../components/lottery/ActionButtons';
 import { ReverseSelectionModal } from '../components/reverseSelection/ReverseSelectionModal';
@@ -287,7 +288,9 @@ export function HomePage() {
               color="red"
               matched={[]}
             />
-            
+
+            <QuickAnalysis redBalls={redBalls} lotteryType={lotteryType} />
+
             <NumberGrid
               title="蓝球区"
               min={config.blueBalls.min}
